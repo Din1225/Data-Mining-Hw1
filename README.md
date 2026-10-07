@@ -37,5 +37,5 @@ python -m pip install -r requirment.txt
 ## 文件
 
 - `doc/Task_Definition_and_Data.md`：任務定義、資料摘要、資料切分與 preprocessing 說明。
-- `doc/Exploratory_Feature_Analysis.md`：feature–target 圖表、Pearson correlation、feature redundancy 與後續假設。
+- `doc/Exploratory_Feature_Analysis_and_Feature_Engineering.md`：feature–target 圖表、Pearson correlation、feature redundancy 與後續假設。
 
