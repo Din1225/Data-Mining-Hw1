@@ -11,7 +11,7 @@ HW1/
 ├── data/                       # 原始資料、固定切分與前處理後資料
 │   ├── FC26_20250921.csv       # Kaggle 原始資料
 │   ├── splits/                 # 80/20 train-test 與 training portion 的 5-fold 資料
-│   └── processed_splits/       # 前處理後的 sparse matrices、indices 與 feature mapping
+│   └── processed_splits/       # 前處理後的 train-test 與 training portion 的 5-fold 資料 與 feature mapping
 ├── doc/                        # 實作細節的文件 (可參考來做書面報告或上台報告)
 ├── png/                        # 使用到的圖表和圖片
 ├── src/                        # 資料檢查、切分、前處理與 EDA 的可重現程式
