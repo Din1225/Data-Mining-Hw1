@@ -1,0 +1,5 @@
+model,feature_set,estimator,log_target
+trivial_mean,A,DummyRegressor(),False
+simple_ols_overall,A,LinearRegression(),True
+strong_random_forest,A,"RandomForestRegressor(n_estimators=300, n_jobs=8, random_state=42)",True
+ours_ols,C,LinearRegression(),True

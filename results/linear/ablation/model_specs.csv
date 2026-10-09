@@ -1,0 +1,8 @@
+model,target,estimator,dense_input
+set_a,log1p,LinearRegression(),False
+set_b_top31,log1p,LinearRegression(),False
+set_c,log1p,LinearRegression(),False
+set_c_minus_nonlinear,log1p,LinearRegression(),False
+set_c_minus_interaction,log1p,LinearRegression(),False
+set_c_minus_domain_rules,log1p,LinearRegression(),False
+set_c_plus_aggregates,log1p,LinearRegression(),False

@@ -1,0 +1,11 @@
+{
+  "model": "random_forest",
+  "target": "log1p",
+  "params": {
+    "max_features": 1.0,
+    "min_samples_leaf": 1
+  },
+  "cv_rmsle_positive_mean": 0.06672429449769395,
+  "cv_rmsle_positive_std": 0.004666499899924852,
+  "n_configs": 15
+}

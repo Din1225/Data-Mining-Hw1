@@ -1,0 +1,5 @@
+variant,params,cv_rmsle_mean,cv_rmsle_std,n_configs
+ols,{},0.171089,0.009098,1
+ridge,{'alpha': 0.001},0.171089,0.009098,15
+lasso,{'alpha': 1e-06},0.171089,0.009098,11
+elastic_net,"{'alpha': 1e-06, 'l1_ratio': 0.8}",0.171089,0.009098,33

@@ -1,0 +1,10 @@
+{
+  "variant": "ols",
+  "params": {},
+  "cv_rmsle_mean": 0.17108904967084493,
+  "cv_rmsle_std": 0.009097972097147296,
+  "n_configs": 1,
+  "selection_rule": "OLS unless a penalized variant beats it by more than one standard error of CV RMSLE",
+  "best_variant_by_cv": "ols",
+  "one_standard_error": 0.004068736813323535
+}

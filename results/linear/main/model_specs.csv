@@ -1,0 +1,8 @@
+model,target,estimator,dense_input
+trivial_mean,raw,DummyRegressor(),False
+simple_ols_overall,log1p,LinearRegression(),False
+strong_random_forest,log1p,"RandomForestRegressor(n_estimators=300, n_jobs=8, random_state=42)",True
+ours_ols,log1p,LinearRegression(),False
+ours_ridge,log1p,Ridge(alpha=0.001),False
+ours_lasso,log1p,"Lasso(alpha=1e-06, max_iter=20000)",False
+ours_elastic_net,log1p,"ElasticNet(alpha=1e-06, l1_ratio=0.8, max_iter=20000)",False
