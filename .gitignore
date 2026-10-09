@@ -1,0 +1,9 @@
+# Python 快取
+__pycache__/
+*.py[cod]
+
+# 本機背景執行的 log、狀態檔與啟動腳本
+results/**/_logs/
+
+# 早期探索（樹模型、兩階段模型、ensemble 等），不是最終報告內容，只保留在本機
+exploration/
