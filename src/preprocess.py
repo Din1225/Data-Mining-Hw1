@@ -47,7 +47,8 @@ IDENTIFIER_COLUMNS = [
 LEAKAGE_COLUMNS = ["wage_eur", "release_clause_eur"]
 CONSTANT_COLUMNS = ["fifa_version", "fifa_update", "fifa_update_date"]
 ALL_MISSING_COLUMNS = ["work_rate"]
-REDUNDANT_COLUMNS = ["dob", "league_id", "club_team_id", "nationality_id"]
+# league_name 不是唯一鍵（例如 Premier League 同時代表英超與烏克蘭超），因此聯賽改用 league_id 編碼。
+REDUNDANT_COLUMNS = ["dob", "league_name", "club_team_id", "nationality_id"]
 
 NUMERIC_COLUMNS = [
     "overall",
@@ -107,7 +108,7 @@ STRUCTURAL_NUMERIC_COLUMNS = [
 ]
 
 GENERAL_CATEGORICAL_COLUMNS = [
-    "league_name",
+    "league_id",
     "club_name",
     "club_position",
     "club_jersey_number",

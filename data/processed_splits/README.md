@@ -8,6 +8,7 @@
 - 一般數值以 training median 補值；位置限定數值缺值填 0。
 - 數值欄位使用 `StandardScaler`。
 - 無序類別使用 one-hot；低頻類別合併；多選字串使用 multi-hot。
+- 聯賽使用 `league_id` one-hot；`league_name` 不是唯一鍵（例如英超與烏克蘭超都叫 `Premier League`），因此不使用。
 - `club_joined_date` 轉為 `club_tenure_years`；`ls`–`gk` 位置評分拆成 base 與 modifier。
 - 新增 `overall_squared` 與 `overall_x_reputation`，讓線性模型表達非線性及交互作用。
 - 保留極端但合理的球員資料。
