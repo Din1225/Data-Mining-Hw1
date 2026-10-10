@@ -29,7 +29,7 @@ HW1/
 ```bash
 conda create --name dm-hw1 python=3.12 pip -y
 conda activate dm-hw1
-python -m pip install -r requirment.txt
+python -m pip install -r requirements.txt
 ```
 
 ## 主要程式
