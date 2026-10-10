@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & RMSLE & RMSLE (value $>$ 0) & Within $\pm$20\% (\%) & MAE (\euro{}K) & MedAE (\euro{}K) & R$^2$ \\
+\midrule
+Trivial (training mean) & 2.002 $\pm$ 0.068 & 1.621 $\pm$ 0.024 & 7.4 $\pm$ 0.3 & 3,248 $\pm$ 63 & 2,169 $\pm$ 27 & 0.000 $\pm$ 0.000 \\
+Simple (OLS on overall) & 1.293 $\pm$ 0.129 & 0.596 $\pm$ 0.007 & 26.3 $\pm$ 0.9 & 1,533 $\pm$ 54 & 292 $\pm$ 10 & 0.468 $\pm$ 0.013 \\
+Strong (Random Forest) & 0.269 $\pm$ 0.114 & \textbf{0.098 $\pm$ 0.031 $^\dagger$} & \textbf{97.8 $\pm$ 0.4} & \textbf{174 $\pm$ 14} & \textbf{17 $\pm$ 1} & 0.969 $\pm$ 0.012 \\
+Ours (OLS, Set C) & \textbf{0.171 $\pm$ 0.009 $^\dagger$} & 0.156 $\pm$ 0.006 $^\dagger$ & 86.2 $\pm$ 0.4 & 362 $\pm$ 17 & 71 $\pm$ 2 & \textbf{0.976 $\pm$ 0.005} \\
+\bottomrule
+\end{tabular}
+\caption{5-fold CV on the training portion (mean $\pm$ std over folds). Bold: best mean per column. Decision threshold: $\pm$20\% relative error. Within: share of players with value $>$ 0 whose prediction is within the threshold. $^\dagger$: RMSLE $\leq$ ln(1.2) = 0.182, i.e. the typical error is within the threshold.}
+\label{tab:main_cv}
+\end{table*}

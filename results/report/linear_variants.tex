@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Variant & Search space & Best setting & CV RMSLE \\
+\midrule
+ols (selected) & --- & --- & 0.1711 $\pm$ 0.0091 \\
+ridge & alpha ∈ [0.001, 10000] (15 values) & alpha = 0.001 & 0.1711 $\pm$ 0.0091 \\
+lasso & alpha ∈ [1e-06, 0.1] (11 values) & alpha = 1e-06 & 0.1711 $\pm$ 0.0091 \\
+elastic\_net & alpha ∈ [1e-06, 0.1] (11 values); l1\_ratio ∈ [0.2, 0.8] (3 values) & alpha = 1e-06, l1\_ratio = 0.8 & 0.1711 $\pm$ 0.0091 \\
+\bottomrule
+\end{tabular}
+\caption{Linear variants on Set C, tuned by 5-fold CV. Every penalized variant selects the smallest penalty in its grid, i.e. it reduces to OLS.}
+\label{tab:linear_variants}
+\end{table*}

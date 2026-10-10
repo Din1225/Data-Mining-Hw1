@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & RMSLE & RMSLE (value $>$ 0) & Within $\pm$20\% (\%) & MAE (\euro{}K) & MedAE (\euro{}K) & R$^2$ \\
+\midrule
+Trivial (training mean) & 1.867 & 1.592 & 8.2 & 3,265 & 2,139 & 0.000 \\
+Simple (OLS on overall) & 1.109 & 0.593 & 25.3 & 1,572 & 304 & 0.478 \\
+Strong (Random Forest) & \textbf{0.078 $^\dagger$} & \textbf{0.070 $^\dagger$} & \textbf{98.2} & \textbf{155} & \textbf{16} & \textbf{0.979} \\
+Ours (OLS, Set C) & 0.160 $^\dagger$ & 0.155 $^\dagger$ & 85.8 & 365 & 74 & 0.977 \\
+\bottomrule
+\end{tabular}
+\caption{Held-out test set (evaluated once, after all model and feature decisions were fixed). Bold: best per column. Decision threshold: $\pm$20\% relative error. Within: share of players with value $>$ 0 whose prediction is within the threshold. $^\dagger$: RMSLE $\leq$ ln(1.2) = 0.182, i.e. the typical error is within the threshold.}
+\label{tab:test}
+\end{table*}

@@ -1,0 +1,27 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Dimension & Slice & n & RMSLE RF & RMSLE Ours & Within $\pm$20\% (\%) RF & Within $\pm$20\% (\%) Ours \\
+\midrule
+value band & \euro{}0 & 93 & 3.382 & \textbf{0.898} & --- & --- \\
+value band & $<$\euro{}1M & 7,201 & \textbf{0.129} & 0.167 & \textbf{97.0} & 87.9 \\
+value band & \euro{}1M--10M & 6,543 & \textbf{0.058} & 0.136 & \textbf{99.0} & 86.0 \\
+value band & $\geq$\euro{}10M & 887 & \textbf{0.100} & 0.199 & \textbf{95.4} & 74.2 \\
+league level & level 1 & 10,799 & 0.334 & \textbf{0.170} & \textbf{97.4} & 85.0 \\
+league level & level 2 & 2,317 & \textbf{0.048} & 0.144 & \textbf{99.1} & 88.6 \\
+league level & level 3--4 & 1,534 & \textbf{0.071} & 0.136 & \textbf{98.8} & 91.1 \\
+league level & no club & 74 & \textbf{0.006} & 0.769 & --- & --- \\
+position & GK & 1,672 & \textbf{0.241} & 0.275 & \textbf{94.0} & 74.1 \\
+position & DEF & 4,864 & 0.268 & \textbf{0.139} & \textbf{98.1} & 88.8 \\
+position & MID & 5,514 & 0.208 & \textbf{0.151} & \textbf{98.3} & 86.9 \\
+position & FWD & 2,674 & 0.445 & \textbf{0.180} & \textbf{98.6} & 87.7 \\
+age band & $\leq$21 & 3,749 & \textbf{0.037} & 0.117 & \textbf{99.8} & 92.1 \\
+age band & 22--29 & 8,057 & \textbf{0.048} & 0.140 & \textbf{99.5} & 87.9 \\
+age band & $\geq$30 & 2,918 & 0.639 & \textbf{0.276} & \textbf{90.5} & 73.7 \\
+\bottomrule
+\end{tabular}
+\caption{CV out-of-fold error by slice. Within $\pm$20\%: share of players with value $>$ 0 whose prediction is within the decision threshold (undefined for \euro{}0 players). Bold: the better model.}
+\label{tab:slices}
+\end{table*}

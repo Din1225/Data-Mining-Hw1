@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Model & $\pm$10\% & $\pm$20\% (decided) & $\pm$30\% & $\pm$50\% \\
+\midrule
+Trivial (training mean) & 3.8 & 7.4 & 10.6 & 16.8 \\
+Simple (OLS on overall) & 13.1 & 26.3 & 40.2 & 77.4 \\
+Strong (Random Forest) & \textbf{92.4} & \textbf{97.8} & \textbf{99.0} & \textbf{99.7} \\
+Ours (OLS, Set C) & 54.6 & 86.2 & 95.8 & 98.7 \\
+\bottomrule
+\end{tabular}
+\caption{Share of players with value $>$ 0 whose CV prediction is within each candidate relative-error threshold (\%, mean over 5 folds). The model ranking is the same at every threshold. Bold: best per column.}
+\label{tab:threshold_sensitivity}
+\end{table*}

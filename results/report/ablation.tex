@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Feature set & \#Features & RMSLE & Within $\pm$20\% (\%) & $\Delta$RMSLE vs C & Folds worse than C & Paired t p & MAE (\euro{}K) & R$^2$ \\
+\midrule
+A: processed raw columns & 1,170--1,179 & 0.507 $\pm$ 0.083 & 61.6 $\pm$ 1.1 & 0.336 $\pm$ 0.079 & 5/5 & $<$ 0.001 & 762 $\pm$ 63 & 0.763 $\pm$ 0.095 \\
+B: top-31 by $|$Pearson r$|$ with value & 31 & 1.143 $\pm$ 0.111 & 54.3 $\pm$ 0.4 & 0.972 $\pm$ 0.110 & 5/5 & $<$ 0.001 & 1,404 $\pm$ 147 & 0.321 $\pm$ 0.181 \\
+B': top-31 by $|$Pearson r$|$ with log1p(value) & 31 & 0.613 $\pm$ 0.097 & 56.9 $\pm$ 0.6 & 0.442 $\pm$ 0.092 & 5/5 & $<$ 0.001 & 930 $\pm$ 48 & 0.802 $\pm$ 0.024 \\
+\textbf{C: ours (final)} & 31 & 0.171 $\pm$ 0.009 $^\dagger$ & 86.2 $\pm$ 0.4 & --- & --- & --- & 362 $\pm$ 17 & 0.976 $\pm$ 0.005 \\
+C $-$ nonlinear (overall$^2$, age$^2$) & 29 & 0.228 $\pm$ 0.007 & 72.2 $\pm$ 1.2 & 0.057 $\pm$ 0.003 & 5/5 & $<$ 0.001 & 528 $\pm$ 13 & 0.946 $\pm$ 0.006 \\
+C $-$ interaction (overall $\times$ reputation) & 30 & 0.174 $\pm$ 0.009 $^\dagger$ & 85.5 $\pm$ 0.4 & 0.003 $\pm$ 0.001 & 5/5 & 0.004 & 471 $\pm$ 24 & 0.906 $\pm$ 0.033 \\
+C $-$ domain rules (free agent, age $\geq$ 40, top-5) & 28 & 1.041 $\pm$ 0.105 & 60.7 $\pm$ 2.6 & 0.870 $\pm$ 0.105 & 5/5 & $<$ 0.001 & 1,239 $\pm$ 87 & 0.373 $\pm$ 0.103 \\
+C $-$ overall and derived (H1) & 28 & 0.283 $\pm$ 0.005 & 62.2 $\pm$ 1.0 & 0.112 $\pm$ 0.006 & 5/5 & $<$ 0.001 & 667 $\pm$ 33 & 0.902 $\pm$ 0.008 \\
+C $-$ reputation and derived (H2) & 29 & 0.175 $\pm$ 0.009 $^\dagger$ & 85.2 $\pm$ 0.4 & 0.003 $\pm$ 0.001 & 5/5 & 0.002 & 452 $\pm$ 25 & 0.922 $\pm$ 0.029 \\
+C + club/league mean overall & 33 & 0.171 $\pm$ 0.009 $^\dagger$ & 86.2 $\pm$ 0.4 & 0.000 $\pm$ 0.000 & 2/5 & 0.658 & 362 $\pm$ 17 & 0.976 $\pm$ 0.005 \\
+\bottomrule
+\end{tabular}
+\caption{Feature-set ablation with the final OLS (same folds and tuning). $\Delta$ and paired t-test are per-fold differences from Set C. Decision threshold: $\pm$20\% relative error. Within: share of players with value $>$ 0 whose prediction is within the threshold. $^\dagger$: RMSLE $\leq$ ln(1.2) = 0.182, i.e. the typical error is within the threshold.}
+\label{tab:ablation}
+\end{table*}
