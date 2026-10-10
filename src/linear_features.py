@@ -14,7 +14,8 @@
      「Set C + aggregates」保留比較。
 3. 所有需要從資料學習的量（中心化的平均、補值中位數、球會／聯賽平均、標準化）都只在各 fold 的
    training subset 上計算；training 列的球會／聯賽平均採 leave-one-out，避免包含自己。
-4. Set B 在每個 fold 的 training subset 上，依各欄與 value_eur 的 |Pearson r| 選出前 k 個 Set A 欄位。
+4. Set B 在每個 fold 的 training subset 上，依各欄與 value_eur 的 |Pearson r| 選出前 k 個 Set A 欄位；
+   另有改依 log1p(value_eur) 排序的版本，檢查結論是否只是 raw 身價高度偏態造成的。
 
 本模組不讀取 held-out test set。
 """
@@ -227,10 +228,11 @@ def column_pearson(X: sparse.csr_matrix | np.ndarray, y: np.ndarray) -> np.ndarr
 
 
 # Set B：在每個 fold 的 training subset 上，依 |Pearson r(feature, value_eur)| 選出前 k 個 Set A 欄位。
-def build_set_b_folds(set_a_folds: list[FoldData], k: int) -> list[FoldData]:
+# log_target=True 時改用 log1p(value_eur) 計算相關係數（robustness 版本）。
+def build_set_b_folds(set_a_folds: list[FoldData], k: int, log_target: bool = False) -> list[FoldData]:
     folds = []
     for data in set_a_folds:
-        r = column_pearson(data.X_train, data.y_train)
+        r = column_pearson(data.X_train, np.log1p(data.y_train) if log_target else data.y_train)
         selected = np.sort(np.argsort(-np.abs(r))[:k])
         mapping = data.feature_mapping.iloc[selected].reset_index(drop=True)
         mapping = mapping.assign(output_index=range(len(selected)), pearson_r=r[selected])
