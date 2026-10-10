@@ -1,0 +1,61 @@
+dimension,slice,model,n,n_positive,within_threshold,median_abs_pct_error,n_zero,zero_pred_max_eur
+value_band,<€1M,trivial_mean,7201,7201,0.000000,5.198791,0,
+value_band,<€1M,simple_ols_overall,7201,7201,0.215664,0.344042,0,
+value_band,<€1M,strong_random_forest,7201,7201,0.970421,0.024077,0,
+value_band,<€1M,ours_ols,7201,7201,0.879045,0.083696,0,
+value_band,€0,trivial_mean,93,0,,,93,2944425.890000
+value_band,€0,simple_ols_overall,93,0,,,93,18099927.080000
+value_band,€0,strong_random_forest,93,0,,,93,15191572.490000
+value_band,€0,ours_ols,93,0,,,93,67.890000
+value_band,€1M–10M,trivial_mean,6543,6543,0.165215,0.635792,0,
+value_band,€1M–10M,simple_ols_overall,6543,6543,0.347241,0.329759,0,
+value_band,€1M–10M,strong_random_forest,6543,6543,0.990066,0.017396,0,
+value_band,€1M–10M,ours_ols,6543,6543,0.860003,0.092444,0,
+value_band,≥€10M,trivial_mean,887,887,0.000000,0.847997,0,
+value_band,≥€10M,simple_ols_overall,887,887,0.022548,0.622179,0,
+value_band,≥€10M,strong_random_forest,887,887,0.953777,0.038049,0,
+value_band,≥€10M,ours_ols,887,887,0.741826,0.136734,0,
+league_level,level 1,trivial_mean,10799,10780,0.080983,1.645888,19,2944425.890000
+league_level,level 1,simple_ols_overall,10799,10780,0.250186,0.364744,19,18099927.080000
+league_level,level 1,strong_random_forest,10799,10780,0.974119,0.022927,19,15191572.490000
+league_level,level 1,ours_ols,10799,10780,0.850093,0.091834,19,67.890000
+league_level,level 2,trivial_mean,2317,2317,0.086750,1.425398,0,
+league_level,level 2,simple_ols_overall,2317,2317,0.298662,0.329444,0,
+league_level,level 2,strong_random_forest,2317,2317,0.990937,0.017289,0,
+league_level,level 2,ours_ols,2317,2317,0.886060,0.088764,0,
+league_level,level 3–4,trivial_mean,1534,1534,0.004563,4.501053,0,
+league_level,level 3–4,simple_ols_overall,1534,1534,0.297262,0.310133,0,
+league_level,level 3–4,strong_random_forest,1534,1534,0.987614,0.021605,0,
+league_level,level 3–4,ours_ols,1534,1534,0.911343,0.080003,0,
+league_level,no club,trivial_mean,74,0,,,74,2944425.890000
+league_level,no club,simple_ols_overall,74,0,,,74,10212650.240000
+league_level,no club,strong_random_forest,74,0,,,74,0.050000
+league_level,no club,ours_ols,74,0,,,74,8.020000
+position,DEF,trivial_mean,4864,4838,0.073998,1.944426,26,2944425.890000
+position,DEF,simple_ols_overall,4864,4838,0.256304,0.354567,26,7496038.980000
+position,DEF,strong_random_forest,4864,4838,0.981397,0.023918,26,2247467.150000
+position,DEF,ours_ols,4864,4838,0.887970,0.086468,26,11.200000
+position,FWD,trivial_mean,2674,2651,0.077329,1.676751,23,2944425.890000
+position,FWD,simple_ols_overall,2674,2651,0.286684,0.354268,23,18099927.080000
+position,FWD,strong_random_forest,2674,2651,0.986043,0.014679,23,15191572.490000
+position,FWD,ours_ols,2674,2651,0.877028,0.086484,23,67.890000
+position,GK,trivial_mean,1672,1662,0.040313,4.823309,10,2944425.890000
+position,GK,simple_ols_overall,1672,1662,0.215403,0.358168,10,7514971.700000
+position,GK,strong_random_forest,1672,1662,0.940433,0.035514,10,0.000000
+position,GK,ours_ols,1672,1662,0.740674,0.118126,10,4.280000
+position,MID,trivial_mean,5514,5480,0.082299,1.446047,34,2944425.890000
+position,MID,simple_ols_overall,5514,5480,0.271350,0.351261,34,6446467.440000
+position,MID,strong_random_forest,5514,5480,0.983029,0.020273,34,3166.220000
+position,MID,ours_ols,5514,5480,0.869161,0.088026,34,5.130000
+age_band,22–29,trivial_mean,8057,8017,0.088687,1.223225,40,2944425.890000
+age_band,22–29,simple_ols_overall,8057,8017,0.419983,0.249416,40,7514971.700000
+age_band,22–29,strong_random_forest,8057,8017,0.995385,0.019863,40,0.050000
+age_band,22–29,ours_ols,8057,8017,0.879381,0.085854,40,6.780000
+age_band,≤21,trivial_mean,3749,3746,0.062200,3.816988,3,2910477.290000
+age_band,≤21,simple_ols_overall,3749,3746,0.054458,0.375073,3,407775.330000
+age_band,≤21,strong_random_forest,3749,3746,0.997597,0.015568,3,0.000000
+age_band,≤21,ours_ols,3749,3746,0.921249,0.075616,3,0.000000
+age_band,≥30,trivial_mean,2918,2868,0.047768,2.913675,50,2944425.890000
+age_band,≥30,simple_ols_overall,2918,2868,0.095537,0.721910,50,18099927.080000
+age_band,≥30,strong_random_forest,2918,2868,0.904812,0.043389,50,15191572.490000
+age_band,≥30,ours_ols,2918,2868,0.737099,0.134440,50,67.890000

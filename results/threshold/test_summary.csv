@@ -1,0 +1,5 @@
+model,n_positive,within_threshold,median_abs_pct_error,n_zero,zero_pred_max_eur
+trivial_mean,3665,0.082128,1.913682,16,2913681.540000
+simple_ols_overall,3665,0.252933,0.362723,16,6310059.320000
+strong_random_forest,3665,0.981719,0.018389,16,6.910000
+ours_ols,3665,0.857844,0.091049,16,6.360000

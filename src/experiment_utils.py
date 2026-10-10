@@ -41,6 +41,9 @@ N_JOBS = int(os.environ.get("FC26_N_JOBS", "16"))
 ID_COLUMNS = ["original_index", "player_id", "short_name"]
 METRIC_COLUMNS = ["rmsle", "rmsle_positive", "rmse_eur", "mae_eur", "medae_eur", "r2_eur"]
 EUR_AMOUNT_METRICS = {"rmse_eur", "mae_eur", "medae_eur"}
+# Decision threshold（2026-10-09 組內決定，理由見 doc/Decision_Threshold.md）：身價 > 0 的球員，
+# 相對誤差 |預測 / 實際 − 1| ≤ 20% 視為不會改變使用者（球探判斷報價）的決策。
+DECISION_THRESHOLD = 0.20
 
 
 # 單一 fold 的 training／validation 資料；X 與 y 已依 original_index 對齊。
