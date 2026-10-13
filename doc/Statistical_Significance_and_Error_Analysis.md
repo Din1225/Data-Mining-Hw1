@@ -14,12 +14,13 @@
 | Within ±20% (%) | 85.8 | 98.2 | 12.4 | [11.3, 13.5] | < 0.001 |
 
 **Held-out test 上，RF 的 MAE、RMSLE 與 Within ±20% 均較佳。** MAE／RMSLE 的改善幅度是 Ours − RF；Within ±20% 是 RF − Ours，差值單位為百分點。後者只包含身價 > 0 的 3,665 位球員。
+主模型保留 OLS 是為了符合最終 predictor 為線性模型的要求，而不是因為它在 test 上勝過 RF。RF 使用原始前處理後的大型特徵集，OLS 使用 31-feature Set C，模型類型與特徵集同時不同；較彈性的非線性擬合及較多輸入都是候選原因，不能將差距只歸因於單一因素。主實驗與特徵設計的解讀見 [Experiments_and_Ablation](Experiments_and_Ablation.md)。
 MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test 使用 squared log1p loss，CI 則直接 bootstrap RMSLE 差；Within ±20% 使用 exact McNemar。p-value 對三項指標檢定作 Bonferroni 校正，CI 為逐項區間。
 這些推論假設球員獨立、模型固定。league cluster bootstrap 的敏感度結果保留在 [model_comparisons.csv](../results/statistical_analysis/model_comparisons.csv)。±20% 門檻於 test 評估後決定，屬事後分析；它與「每位球員都符合某個 RMSLE 門檻」不是同一判準。
 
 ## Final Model Coefficients (§8.1)
 
-以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與 p-value 採 HC3；組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](../results/statistical_analysis/coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。
+以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與逐項 p-value 採 HC3 covariance 的 OLS t-test（t 分布近似）；正文 p-value 未作多重校正，31-feature Bonferroni 結果另見 CSV。組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](../results/statistical_analysis/coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。
 
 | Feature | β | HC3 95% CI | HC3 p | VIF |
 |---|---:|---|---:|---:|
@@ -59,6 +60,20 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 - **方法差異：** HC3 下有 13 個 features 的 p > 0.05，classical OLS 為 12 個。`unique_body_type` 的 p 從約 0.0024 變為 0.270，需在報告中明確標示使用哪種方法。
 - **解讀：** 平方項與交互項須共同考慮。HC3 處理異質變異，但 CI／p 仍條件於既定模型與特徵選擇，不涵蓋 club／league 群聚；不顯著不等於沒有作用，係數也不代表因果效果。
 
+### 係數方向與量級
+
+§4 只事先提出 H1／H2；其餘 features 以下作分組描述，沒有補造事前方向假設。每個 feature 的正負、大小與 CI 均列於上表。β 範圍是每 1 training SD 的 log1p(value_eur) 尺度，平方／交互項仍須共同判讀。
+
+| Feature group | β 範圍 | 條件方向與解讀 |
+|---|---|---|
+| base (11) | [-0.2380, 0.9396] | overall、potential 為較大的正係數；age 為負，但需與平方項合併。height_cm、weight_kg、league_level、club_tenure_years 的 CI 含零；weak_foot、skill_moves、contract_years_left 的 β 較小。international_reputation 的效果受 interaction 改變，另於 H2 討論。 |
+| summary_ratings (6) | [-0.0062, 0.0406] | shooting、passing、physic 為正；pace、dribbling、defending 的 CI 含零。這些能力欄位與 overall 的資訊重疊，個別係數是控制其他能力後的條件關聯。 |
+| position (3) | [-0.0138, 0.0121] | is_defender 為負、is_forward 為正，is_goalkeeper 的 CI 含零；是相對參考編碼的條件差異，不能推論某種位置普遍較有價值。 |
+| profile (5) | [-0.0049, 0.0030] | left_footed、real_face、unique_body_type、in_national_team、on_loan 的 CI 均含零；目前沒有足夠證據支持各個條件係數異於零，不等於證明沒有作用。 |
+| nonlinear (2) | [-0.2225, 0.1255] | overall_sq_centered 為正、age_sq_centered 為負，與 §4 的能力凸性及年齡先升後降觀察一致；不能單看一次項推論所有年齡或能力區間。 |
+| interaction (1) | [-0.1531, -0.1531] | overall_x_reputation 為負，讓 international_reputation 的條件效果隨 overall 增加而下降；需與兩個主項合併，不代表 reputation 的整體關聯必為負。 |
+| domain_rules (3) | [-1.0237, 0.0111] | is_free_agent、age40_outfield 為較大的負係數，與資料中的 €0 規則一致；top5_league 為小的正係數。這些是資料／遊戲規則下的條件關聯，不是現實轉會的因果溢價。 |
+
 ### Part 1 假設的對照（H1、H2）
 
 | Hypothesis | 移除的 features | CV RMSLE | 結果 |
@@ -70,6 +85,10 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 消融數值直接引用 [組員的 CV 消融結果](../results/linear/ablation/cv_summary.csv)，不採用其中的 fold paired t-test p-value。
 
 `international_reputation` 的條件效果會隨 `overall` 改變，例如 `overall` = 80 時 +1 約對應 +8.5%，85 時約 −3.7%。局部 training 支持與完整有限對比見 [marginal_effects.csv](../results/statistical_analysis/marginal_effects.csv)。
+
+H1／H2 有兩個問題，需分開回答：移除特徵後的 CV 表現支持它們有預測價值；方向預期則不一定在所有條件下成立。H1 的正向一次項及平方項與 §4 觀察一致，實際對比仍依 reputation 改變。H2 的 raw Pearson r = 0.721 為正，但 overall = 85 時的條件對比為 −3.7%，沒有支持「任何能力水準下 reputation 越高都越貴」的解讀。
+
+H2 的符號反轉在模型中直接來自負的 overall_x_reputation，這與 raw correlation 的未控制關聯不同。international_reputation 的 VIF 為 19.1、interaction 為 18.6；共線性、控制其他能力後的關聯及未包含資訊都是候選解釋，不能由係數證明原因。overall = 85、reputation = 3 的局部 training 支持有 172 位，reputation = 1 僅 1 位；有限對比不是同一球員 reputation 改變的真實實驗，稀疏情境須保守解讀。
 
 ### EUR 尺度的實務意義
 
@@ -91,6 +110,17 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 | A. Hakimi | 111.000 | 137.490 | -26.490 | 10.522 |
 | R. Gravenberch | 66.500 | 84.729 | -18.229 | 0.076 |
 | M. Caicedo | 93.000 | 110.164 | -17.164 | 17.988 |
+
+最大金額誤差不等於超出 decision threshold；依每位球員實際身價計算：
+
+| Player | Absolute relative error (%) | Within ±20% |
+|---|---:|---|
+| A. Hakimi | 23.86 | 否 |
+| R. Gravenberch | 27.41 | 否 |
+| M. Caicedo | 18.46 | 是 |
+
+M. Caicedo 仍在 ±20% 內，但他的 absolute EUR error 位居第三，因此依 §8.2 的最大金額誤差選例保留。
+
 
 ### A. Hakimi
 
@@ -115,7 +145,9 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 ### 共同模式與改善方向
 
 三例都是高身價 RB／CDM，且 OLS 高估。Training OOF 中，身價 ≥€50M 的 RB／CDM 只有 6 位，OLS 對 6 位高估；平均 signed error 為 −€7.285M，MAE 為 Ours €7.285M、RF €8.015M。這支持進一步檢查高身價球員的校準，但不能推論所有後衛都高估，或 RF 在所有高身價球員都更好。
-這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](../results/statistical_analysis/shared_pattern_oof.csv)。後續可在新的實驗中檢查位置 × 能力、`age` × `potential` 的交互項或分段效果，不用目前的 test 調參。
+這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](../results/statistical_analysis/shared_pattern_oof.csv)。
+
+第一個要嘗試的改善是在 Set C 加入 RB／CDM indicator × overall 的交互項，檢查模型能否較好地表達高能力右後衛／防守中場的身價映射。這仍是線性於 β 的模型。後續實驗只使用 training CV，預先固定群體定義（主要位置 RB／CDM、overall ≥ 85），比較整體 RMSLE、MAE 及該群體 OOF signed error／MAE；若局部改善卻使整體表現變差，就不保留。這是待驗證的第一項實驗，不是已完成的改善。構想由本次 test 錯誤診斷提出；後續只用 training CV 比較候選，不再用目前 test 調參或選模型。若要宣稱泛化改善，需另以未使用的資料確認。
 
 ![誤差分布](../png/statistical_analysis_residuals.png)
 

@@ -51,7 +51,7 @@
     },
     {
       "path": "src/analyze_current_results.py",
-      "sha256": "c1714244aa58e829e7dfd1b3355cd76c8a752b0ad15a7aca260ed8f6bcc0b6be"
+      "sha256": "df037a90fed660ca2e26d48ed2f308f81f6653198395dce08c642c77626373d9"
     },
     {
       "path": "src/linear_features.py",
@@ -81,7 +81,7 @@
     "inference": "特徵與模型視為固定。採獨立球員檢定；聯賽重抽樣只作敏感度檢查。",
     "posthoc": "20%門檻於測試評估後選定，不宣稱是事先指定門檻的推論。",
     "ci": "95%逐項百分位數區間；三項比較的p值採Bonferroni校正。",
-    "script_sha256": "c1714244aa58e829e7dfd1b3355cd76c8a752b0ad15a7aca260ed8f6bcc0b6be",
+    "script_sha256": "df037a90fed660ca2e26d48ed2f308f81f6653198395dce08c642c77626373d9",
     "output_layout": {
       "document": "doc/Statistical_Significance_and_Error_Analysis.md",
       "results": "results/statistical_analysis",

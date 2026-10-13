@@ -251,6 +251,7 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
 
     positive_n = int(comparison.loc[comparison.metric.eq('Within20_percent'),'n'].iloc[0])
     ablation_path = relpath(Path(__file__).resolve().parents[1]/'results/linear/ablation/cv_summary.csv', report.parent.resolve()).replace('\\','/')
+    experiments_path = relpath(Path(__file__).resolve().parents[1]/'doc/Experiments_and_Ablation.md', report.parent.resolve()).replace('\\','/')
     scores_path = relpath(Path(__file__).resolve().parents[1]/'results/final_test/test_scores.csv', report.parent.resolve()).replace('\\','/')
     lines = ['# Statistical_Significance_and_Error_Analysis', '',
         f"**本節接續 part 2 的既有結果，分析最終線性模型 Ours（OLS, Set C）與 strong baseline（Random Forest）。** 固定 training portion 為 {notes['n_train']:,} 筆，held-out test 為 {notes['n_test']:,} 筆。",
@@ -267,10 +268,11 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         lines.append(f'| {label} | {fmt(row.ours)} | {fmt(row.rf)} | {fmt(row.gap_rf_better)} | [{fmt(row.ci95_iid_low)}, {fmt(row.ci95_iid_high)}] | {p_text(row.p_bonferroni_3)} |')
     lines += ['',
         f'**Held-out test 上，RF 的 MAE、RMSLE 與 Within ±20% 均較佳。** MAE／RMSLE 的改善幅度是 Ours − RF；Within ±20% 是 RF − Ours，差值單位為百分點。後者只包含身價 > 0 的 {positive_n:,} 位球員。',
+        f'主模型保留 OLS 是為了符合最終 predictor 為線性模型的要求，而不是因為它在 test 上勝過 RF。RF 使用原始前處理後的大型特徵集，OLS 使用 31-feature Set C，模型類型與特徵集同時不同；較彈性的非線性擬合及較多輸入都是候選原因，不能將差距只歸因於單一因素。主實驗與特徵設計的解讀見 [Experiments_and_Ablation]({experiments_path})。',
         'MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test 使用 squared log1p loss，CI 則直接 bootstrap RMSLE 差；Within ±20% 使用 exact McNemar。p-value 對三項指標檢定作 Bonferroni 校正，CI 為逐項區間。'.replace('三项','三項'),
         '這些推論假設球員獨立、模型固定。league cluster bootstrap 的敏感度結果保留在 [model_comparisons.csv](model_comparisons.csv)。±20% 門檻於 test 評估後決定，屬事後分析；它與「每位球員都符合某個 RMSLE 門檻」不是同一判準。', '',
         '## Final Model Coefficients (§8.1)', '',
-        '以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與 p-value 採 HC3；組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。', '',
+        '以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與逐項 p-value 採 HC3 covariance 的 OLS t-test（t 分布近似）；正文 p-value 未作多重校正，31-feature Bonferroni 結果另見 CSV。組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。', '',
         '| Feature | β | HC3 95% CI | HC3 p | VIF |',
         '|---|---:|---|---:|---:|']
     for row in table.iloc[1:].itertuples():
@@ -279,7 +281,24 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         f"- **VIF：** {int(table.vif.gt(10).sum())} 個 features 的 VIF > 10，與 part 2 一致；共線性會影響個別係數的解讀。",
         f"- **方法差異：** HC3 下有 {int(table.iloc[1:].p_hc3.gt(0.05).sum())} 個 features 的 p > 0.05，classical OLS 為 {int(table.iloc[1:].p_classical.gt(0.05).sum())} 個。`unique_body_type` 的 p 從約 0.0024 變為 0.270，需在報告中明確標示使用哪種方法。",
         '- **解讀：** 平方項與交互項須共同考慮。HC3 處理異質變異，但 CI／p 仍條件於既定模型與特徵選擇，不涵蓋 club／league 群聚；不顯著不等於沒有作用，係數也不代表因果效果。', '',
-        '### Part 1 假設的對照（H1、H2）', '',
+        '### 係數方向與量級', '',
+        '§4 只事先提出 H1／H2；其餘 features 以下作分組描述，沒有補造事前方向假設。每個 feature 的正負、大小與 CI 均列於上表。β 範圍是每 1 training SD 的 log1p(value_eur) 尺度，平方／交互項仍須共同判讀。', '',
+        '| Feature group | β 範圍 | 條件方向與解讀 |',
+        '|---|---|---|']
+    group_notes = {
+        'base': 'overall、potential 為較大的正係數；age 為負，但需與平方項合併。height_cm、weight_kg、league_level、club_tenure_years 的 CI 含零；weak_foot、skill_moves、contract_years_left 的 β 較小。international_reputation 的效果受 interaction 改變，另於 H2 討論。',
+        'summary_ratings': 'shooting、passing、physic 為正；pace、dribbling、defending 的 CI 含零。這些能力欄位與 overall 的資訊重疊，個別係數是控制其他能力後的條件關聯。',
+        'position': 'is_defender 為負、is_forward 為正，is_goalkeeper 的 CI 含零；是相對參考編碼的條件差異，不能推論某種位置普遍較有價值。',
+        'profile': 'left_footed、real_face、unique_body_type、in_national_team、on_loan 的 CI 均含零；目前沒有足夠證據支持各個條件係數異於零，不等於證明沒有作用。',
+        'nonlinear': 'overall_sq_centered 為正、age_sq_centered 為負，與 §4 的能力凸性及年齡先升後降觀察一致；不能單看一次項推論所有年齡或能力區間。',
+        'interaction': 'overall_x_reputation 為負，讓 international_reputation 的條件效果隨 overall 增加而下降；需與兩個主項合併，不代表 reputation 的整體關聯必為負。',
+        'domain_rules': 'is_free_agent、age40_outfield 為較大的負係數，與資料中的 €0 規則一致；top5_league 為小的正係數。這些是資料／遊戲規則下的條件關聯，不是現實轉會的因果溢價。',
+    }
+    require(set(table.iloc[1:].group) == set(group_notes), '係數解讀未涵蓋全部最終特徵群組。')
+    for group, explanation in group_notes.items():
+        selected = table[table.group.eq(group)]
+        lines.append(f'| {group} ({len(selected)}) | [{selected.beta_per_sd_log1p_eur.min():.4f}, {selected.beta_per_sd_log1p_eur.max():.4f}] | {explanation} |')
+    lines += ['', '### Part 1 假設的對照（H1、H2）', '',
         '| Hypothesis | 移除的 features | CV RMSLE | 結果 |',
         '|---|---|---|---|']
     baseline = ablation.loc[ablation.model.eq('set_c'),'rmsle_mean'].iloc[0]
@@ -292,6 +311,8 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         '這與 part 2 對預測價值的解讀一致。因為 CV folds 的 training sets 重疊，這裡使用消融結果作描述性證據；不把五個 folds 當成五個獨立實驗。H1／H2 的整組 HC3 檢定也拒絕零係數（均 p < 0.001），完整結果見 [hypothesis_block_tests.csv](hypothesis_block_tests.csv)。這是條件關聯的檢定，與預測消融的問題不同。',
         f'消融數值直接引用 [組員的 CV 消融結果]({ablation_path})，不採用其中的 fold paired t-test p-value。', '',
         '`international_reputation` 的條件效果會隨 `overall` 改變，例如 `overall` = 80 時 +1 約對應 +8.5%，85 時約 −3.7%。局部 training 支持與完整有限對比見 [marginal_effects.csv](marginal_effects.csv)。', '',
+        'H1／H2 有兩個問題，需分開回答：移除特徵後的 CV 表現支持它們有預測價值；方向預期則不一定在所有條件下成立。H1 的正向一次項及平方項與 §4 觀察一致，實際對比仍依 reputation 改變。H2 的 raw Pearson r = 0.721 為正，但 overall = 85 時的條件對比為 −3.7%，沒有支持「任何能力水準下 reputation 越高都越貴」的解讀。', '',
+        'H2 的符號反轉在模型中直接來自負的 overall_x_reputation，這與 raw correlation 的未控制關聯不同。international_reputation 的 VIF 為 19.1、interaction 為 18.6；共線性、控制其他能力後的關聯及未包含資訊都是候選解釋，不能由係數證明原因。overall = 85、reputation = 3 的局部 training 支持有 172 位，reputation = 1 僅 1 位；有限對比不是同一球員 reputation 改變的真實實驗，稀疏情境須保守解讀。', '',
         '### EUR 尺度的實務意義', '',
         '固定 `overall` = 70、`international_reputation` = 1、其他輸入不變，並假設參考預測為 €1M。共同計入平方項／交互項後，得到以下裁切前預測差：', '',
         '| Feature +1 | 預測差 (€K) | HC3 95% CI (€K) | 與示例 €200K 門檻比較 |',
@@ -307,6 +328,12 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         '|---|---:|---:|---:|---:|---:|']
     for row in cases.head(3).itertuples():
         lines.append(f'| {row.short_name} | {row.y_true/1e6:.3f} | {getattr(row,OURS)/1e6:.3f} | {row.actual_minus_predicted_eur/1e6:.3f} | {row.rf_absolute_error_eur/1e6:.3f} |')
+    lines += ['', '最大金額誤差不等於超出 decision threshold；依每位球員實際身價計算：', '',
+        '| Player | Absolute relative error (%) | Within ±20% |', '|---|---:|---|']
+    for row in cases.head(3).itertuples():
+        relative = row.absolute_error_eur / row.y_true
+        lines.append(f'| {row.short_name} | {relative*100:.2f} | {"是" if relative <= .2 else "否"} |')
+    lines += ['', 'M. Caicedo 仍在 ±20% 內，但他的 absolute EUR error 位居第三，因此依 §8.2 的最大金額誤差選例保留。', '']
     for row in cases.head(3).itertuples():
         matched = evidence[evidence.case_player_id.eq(row.player_id)&evidence.group.eq('similar_ability_age_position')].iloc[0]
         if int(matched.n_train)<3:
@@ -324,7 +351,8 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         '相似球員的匹配只控制主要位置、`overall` 與 `age`，沒有涵蓋所有因素。上述原因是候選解釋；完整證據見 [case_training_evidence.csv](case_training_evidence.csv) 與 [nearest_training_cases.csv](nearest_training_cases.csv)。', '',
         '### 共同模式與改善方向', '',
         f"三例都是高身價 RB／CDM，且 OLS 高估。Training OOF 中，身價 ≥€50M 的 RB／CDM 只有 {int(pattern.n_train)} 位，OLS 對 {int(pattern.n_ols_overpredicted)} 位高估；平均 signed error 為 {signed_money(-pattern.mean_signed_error_ols_eur)}，MAE 為 Ours €{pattern.mae_ols_eur/1e6:.3f}M、RF €{pattern.mae_rf_eur/1e6:.3f}M。這支持進一步檢查高身價球員的校準，但不能推論所有後衛都高估，或 RF 在所有高身價球員都更好。",
-        '這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](shared_pattern_oof.csv)。後續可在新的實驗中檢查位置 × 能力、`age` × `potential` 的交互項或分段效果，不用目前的 test 調參。', '',
+        '這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](shared_pattern_oof.csv)。', '',
+        '第一個要嘗試的改善是在 Set C 加入 RB／CDM indicator × overall 的交互項，檢查模型能否較好地表達高能力右後衛／防守中場的身價映射。這仍是線性於 β 的模型。後續實驗只使用 training CV，預先固定群體定義（主要位置 RB／CDM、overall ≥ 85），比較整體 RMSLE、MAE 及該群體 OOF signed error／MAE；若局部改善卻使整體表現變差，就不保留。這是待驗證的第一項實驗，不是已完成的改善。構想由本次 test 錯誤診斷提出；後續只用 training CV 比較候選，不再用目前 test 調參或選模型。若要宣稱泛化改善，需另以未使用的資料確認。', '',
         f'![誤差分布]({figure.name})', '',
         '圖中 signed error 的定義與案例表相同；完整逐筆結果見 [all_residuals.csv](all_residuals.csv)。原始 CSV 同時保留兩個方向的誤差欄位，閱讀時依欄名判讀。', '',
         '## Analysis Settings', '',
