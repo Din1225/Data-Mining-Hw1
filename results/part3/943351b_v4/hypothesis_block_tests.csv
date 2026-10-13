@@ -1,0 +1,3 @@
+hypothesis,features,f_hc3,p_hc3,df_num,df_denom,p_bonferroni_2
+H1_overall,overall;overall_sq_centered;overall_x_reputation,5569.479225078245,0.0,3.0,14692.0,0.0
+H2_reputation,international_reputation;overall_x_reputation,147.9357729046673,2.4585150763054145e-64,2.0,14692.0,4.917030152610829e-64

@@ -1,0 +1,3 @@
+# 沿用主實驗的固定套件版本，再加入第三部分推論套件。
+-r requirements.txt
+statsmodels>=0.14,<1

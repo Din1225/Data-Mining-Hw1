@@ -40,6 +40,9 @@ python -m pip install -r requirements.txt
 | `src/split_data.py` | 建立固定 80/20 split 與 training portion 的 5-fold 資料 |
 | `src/preprocess.py` | 以 training data fit preprocessing，輸出前處理後資料 |
 | `src/eda_feature_report.py` | 只使用 training split 重現 EDA 圖表與 Pearson correlation |
+| `src/analyze_current_results.py` | 第三部分：重建既有 Set C OLS，核對預測，產生係數推論、OLS／Random Forest 比較與錯誤案例 |
+| `src/analysis_part3.py` | 第三部分共用分析、圖表及資料對齊工具 |
+| `src/part3_chinese.py` | 第三部分圖表中文字型設定 |
 | `src/run_tuning.py` | strong baseline（Random Forest）的超參數搜尋 |
 | `src/run_linear_models.py` | 比較 OLS／Ridge／Lasso／ElasticNet、計算 VIF，與三層 baseline 產生主實驗表 |
 | `src/run_linear_ablation.py` | 特徵集消融（Set A／B／C、移除特徵群組、H1／H2）與分群指標 |
@@ -66,6 +69,10 @@ python src/make_report_figures.py
 `run_final_test.py` 在 `results/final_test/test_scores.csv` 已存在時會拒絕執行，確保 test 只使用一次。
 
 ## 文件
+
+- [第三部分分析結果](results/part3/943351b_v4/Analysis_Summary.md)：當前 OLS 分析底稿，供報告組員整合。
+- [第三部分執行指南](doc/Part3_Analysis_Guide.md)：分析環境、執行指令與推論限制。
+
 
 - `doc/Task_Definition_and_Data.md`：任務定義、資料摘要、資料切分與 preprocessing 說明。
 - `doc/Exploratory_Feature_Analysis_and_Feature_Engineering.md`：feature–target 圖表、Pearson correlation、feature redundancy 與後續假設。

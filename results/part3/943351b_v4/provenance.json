@@ -1,0 +1,102 @@
+{
+  "path_base": "repository_root",
+  "inputs": [
+    {
+      "path": "data/splits/train.csv",
+      "sha256": "c1d491f3b8dc341c522392b62cd7a45a8b0babac34308b277ff53f61f0bf8b4d"
+    },
+    {
+      "path": "data/splits/test.csv",
+      "sha256": "4f998ba76fd2bd4edab0d4b37fc1316413cc4c5814a3de917f00c2eb91c8705e"
+    },
+    {
+      "path": "results/final_test/test_predictions.csv",
+      "sha256": "6a9d02d2c9fe81411dbd107dc209efad81abdafa106145db7b43ee98ebccae0d"
+    },
+    {
+      "path": "results/linear/main/oof_predictions.csv",
+      "sha256": "b72a9a4f6950d0e25e9852415636ff61c1f9258c9ccf375a95fa6663634d1c18"
+    },
+    {
+      "path": "results/final_test/final_model.json",
+      "sha256": "d4ad048caf4f177c49450b9a0acad05059fae7b166efbc71258a317bd3966939"
+    },
+    {
+      "path": "results/final_test/coefficients.csv",
+      "sha256": "b2b6688fcd83d5ec12bbd95cb8e422fc44788c3ee6001721e8be6198a8137589"
+    },
+    {
+      "path": "results/linear/ablation/cv_summary.csv",
+      "sha256": "ac2e788a105606a14f56c710c2daa31fcd3870630d03f2c273090a3c809eae9b"
+    },
+    {
+      "path": "data/splits/train_5-fold_cv/fold_1/validation_indices.csv",
+      "sha256": "f6828c94f254a5dccb06678270e14dedc0e577da7668bd394b67892429248e1a"
+    },
+    {
+      "path": "data/splits/train_5-fold_cv/fold_2/validation_indices.csv",
+      "sha256": "1785f6ef42d5ca8571f6fdc17f983afe7e2bddfe998afa8639709e6532a9e8ef"
+    },
+    {
+      "path": "data/splits/train_5-fold_cv/fold_3/validation_indices.csv",
+      "sha256": "36b016c7d75b9fd1e714cacc8416576d928d7ee168e13cfbf48aa6fcdf4565d0"
+    },
+    {
+      "path": "data/splits/train_5-fold_cv/fold_4/validation_indices.csv",
+      "sha256": "80de12f583442a14493dd5c7eee1434efe60f32730be34dc89be35ffd348d6fe"
+    },
+    {
+      "path": "data/splits/train_5-fold_cv/fold_5/validation_indices.csv",
+      "sha256": "481867493d5de61d53eb2981645774e861af37f5f6226d8e43bd351fd44950d9"
+    },
+    {
+      "path": "src/analyze_current_results.py",
+      "sha256": "49aca87b664afcfd576f27496803166ffa087b4739d49011c274f0a9a0353f8a"
+    },
+    {
+      "path": "src/linear_features.py",
+      "sha256": "8ddb48ccfdbfddba5d40ba1f37621bfc866b7e64234d08b228c4fa71a4765f36"
+    },
+    {
+      "path": "src/experiment_utils.py",
+      "sha256": "da891f6e430f0a9455eab4a02e6af30ff7e0390eb1231e496ad6abe89b717eb2"
+    },
+    {
+      "path": "src/analysis_part3.py",
+      "sha256": "f5c7424db02315668419bba0f6877432af4c6014f5bc44bdead612ee554524f0"
+    },
+    {
+      "path": "src/part3_chinese.py",
+      "sha256": "cdcc51546ccef311bfa873c479929e175972929c0b873c9da478383070c3617d"
+    }
+  ],
+  "settings": {
+    "rank": 32,
+    "condition_number": 23.17334716235896,
+    "max_coefficient_rounding_difference": 2.5266992798478327e-05,
+    "upstream_commit": "943351b62d43fb13278c2910831a6a27a1d7a79b",
+    "n_train": 14724,
+    "n_test": 3681,
+    "bootstrap": 2000,
+    "seed": 42,
+    "max_prediction_rounding_difference": 0.004998202668502927,
+    "target_transform": "log1p",
+    "coefficient_unit": "每一訓練標準差的身價對數尺度；不是歐元差。",
+    "inference": "特徵與模型視為固定。採獨立球員檢定；聯賽重抽樣只作敏感度檢查。",
+    "posthoc": "20%門檻於測試評估後選定，不宣稱是事先指定門檻的推論。",
+    "ci": "95%逐項百分位數區間；三項比較的p值採Bonferroni校正。",
+    "script_sha256": "49aca87b664afcfd576f27496803166ffa087b4739d49011c274f0a9a0353f8a",
+    "presentation": "沿用 part 2 模型名稱與數字格式；正文移除 Git SHA；signed error 呈現為 actual − predicted；原始 CSV 未修改。",
+    "delivery_update": "移除重複中文 CSV 閱讀附件及其產生功能；保留既有分析 CSV、正文與圖表，分析計算未修改。",
+    "delivery_previous_script_sha256": "c24df41e236ae4ce033a1cf64061ecd15834b4e674c326d677d1e8d6f2d5a128",
+    "delivery_verification": "移除閱讀附件後完整重跑；12 份分析 CSV 與既有結果一致（數值容差 1e-12）。"
+  },
+  "versions": {
+    "python": "3.12.14",
+    "numpy": "2.4.4",
+    "pandas": "2.3.2",
+    "scipy": "1.16.2",
+    "sklearn": "1.7.2",
+    "statsmodels": "0.15.0"
+  }
+}

@@ -7,3 +7,8 @@ results/**/_logs/
 
 # 早期探索（樹模型、兩階段模型、ensemble 等），不是最終報告內容，只保留在本機
 exploration/
+
+# 第三部分本機環境、暫存輸出與筆記本快取
+.venv-analysis/
+analysis_outputs/
+.ipynb_checkpoints/
