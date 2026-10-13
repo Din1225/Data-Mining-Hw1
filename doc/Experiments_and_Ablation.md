@@ -6,7 +6,9 @@
 
 | Item | Setting |
 |---|---|
-| Folds | 固定 80/20 split 的 training portion（14,724 筆）做 5-fold `KFold`；所有模型共用相同 folds |
+| Folds | 固定 80/20 split 的 training portion（14,724 筆）做 5-fold `KFold`（shuffle、seed 42）；fold 的 indices 存成檔案（`data/splits/train_5-fold_cv/`），所有模型共用相同 folds |
+| Why KFold | 資料是單一快照（只有一個 `fifa_update`，日期 2025-09-19），不是時間序列；18,405 個 `player_id` 全部不重複，沒有同一實體的多筆資料，因此不需要 TimeSeriesSplit 或 GroupKFold。`src/split_data.py` 會檢查這兩個條件，不成立就停止 |
+| Why 5 folds | 每個 validation fold 約 2,945 人，仍包含 14–26 位 €0 球員與 160–190 位身價 ≥ €1,000 萬的球員；這兩類人數少卻主導誤差，fold 數再增加，每個 fold 裡的這兩類球員會更少，單一 fold 的分數更不穩定。每個 fold 的模型用 80% 的 training portion（11,779 人）訓練，接近最終模型的訓練量 |
 | Target | `log1p(value_eur)`，預測時以 `expm1` 還原；預測值截在 [0, 該 fold training 最高身價] |
 | Primary metric | RMSLE（越低越好） |
 | Other metrics | RMSLE（只算身價 > 0）、MAE、MedAE（歐元）、R²；報告 5 個 fold 的 mean ± std |
