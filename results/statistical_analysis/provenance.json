@@ -51,7 +51,7 @@
     },
     {
       "path": "src/analyze_current_results.py",
-      "sha256": "e7230dade7257d3eca821fdfe43b15d5d23d762e551dfc0c1ca4a8fe271e8b24"
+      "sha256": "c1714244aa58e829e7dfd1b3355cd76c8a752b0ad15a7aca260ed8f6bcc0b6be"
     },
     {
       "path": "src/linear_features.py",
@@ -63,7 +63,7 @@
     },
     {
       "path": "src/analysis_part3.py",
-      "sha256": "8172c664094d7ed934a3c0d8333ae2b542a8002c2f0acb153e5141a9445ece94"
+      "sha256": "cf4173cee804fc4f4a34a276776f3a44cc2eff1ca9f8aa245b9a65f7f4a4d794"
     }
   ],
   "settings": {
@@ -81,9 +81,12 @@
     "inference": "特徵與模型視為固定。採獨立球員檢定；聯賽重抽樣只作敏感度檢查。",
     "posthoc": "20%門檻於測試評估後選定，不宣稱是事先指定門檻的推論。",
     "ci": "95%逐項百分位數區間；三項比較的p值採Bonferroni校正。",
-    "script_sha256": "e7230dade7257d3eca821fdfe43b15d5d23d762e551dfc0c1ca4a8fe271e8b24",
-    "delivery_update": "僅保留正式分析；中文字型合併至共用程式，移除通用 OLS／Ridge／demo 入口及未引用附件。消融直接引用組員原檔，不使用 fold paired t-test p-value。",
-    "delivery_verification": "完整重跑；10 份保留的 CSV 與精簡前結果在 1e-12 容差內一致；原始 CSV 與正文誤差圖未修改。"
+    "script_sha256": "c1714244aa58e829e7dfd1b3355cd76c8a752b0ad15a7aca260ed8f6bcc0b6be",
+    "output_layout": {
+      "document": "doc/Statistical_Significance_and_Error_Analysis.md",
+      "results": "results/statistical_analysis",
+      "figure": "png/statistical_analysis_residuals.png"
+    }
   },
   "versions": {
     "python": "3.12.14",

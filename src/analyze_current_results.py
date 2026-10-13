@@ -9,6 +9,7 @@ import argparse
 from os.path import relpath
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 
@@ -239,7 +240,8 @@ def case_evidence(frame: pd.DataFrame, train: pd.DataFrame, oof: pd.DataFrame) -
 def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
                    cases: pd.DataFrame, evidence: pd.DataFrame, notes: dict,
                    ablation: pd.DataFrame, blocks: pd.DataFrame,
-                   practical: pd.DataFrame, patterns: pd.DataFrame) -> None:
+                   practical: pd.DataFrame, patterns: pd.DataFrame,
+                   report: Path, figure: Path) -> None:
     """沿用組員的模型名稱、單位與精度，整理第三部分正文及證據連結。"""
     def p_text(value: float) -> str:
         return '< 0.001' if value < 0.001 else f'{value:.3f}'
@@ -248,12 +250,13 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         return f"{'−' if value < 0 else ''}€{abs(value)/1e6:.3f}M"
 
     positive_n = int(comparison.loc[comparison.metric.eq('Within20_percent'),'n'].iloc[0])
-    guide_path = relpath(Path(__file__).resolve().parents[1]/'doc/Part3_Analysis_Guide.md', output.resolve()).replace('\\','/')
-    ablation_path = relpath(Path(__file__).resolve().parents[1]/'results/linear/ablation/cv_summary.csv', output.resolve()).replace('\\','/')
-    lines = ['# 統計顯著性與錯誤案例分析', '',
+    ablation_path = relpath(Path(__file__).resolve().parents[1]/'results/linear/ablation/cv_summary.csv', report.parent.resolve()).replace('\\','/')
+    scores_path = relpath(Path(__file__).resolve().parents[1]/'results/final_test/test_scores.csv', report.parent.resolve()).replace('\\','/')
+    lines = ['# Statistical_Significance_and_Error_Analysis', '',
         f"**本節接續 part 2 的既有結果，分析最終線性模型 Ours（OLS, Set C）與 strong baseline（Random Forest）。** 固定 training portion 為 {notes['n_train']:,} 筆，held-out test 為 {notes['n_test']:,} 筆。",
         '模型使用 31 個 features，target 為 `log1p(value_eur)`；預測以 `expm1` 還原，再截在 training 身價範圍。以下使用組員已匯出的 test 預測，並重建同一個 OLS 核對係數。', '',
-        '## 模型比較（§7.1）', '',
+        f'組員在 OLS、Ridge、Lasso、ElasticNet 中選出最終線性模型，另外訓練 Random Forest 作為 strong baseline。本節的顯著性比較針對 OLS／Random Forest；其他 baseline 分數見 [test_scores.csv]({scores_path})。模型、features 與 test 預測均沿用 part 2 的既定結果。', '',
+        '## Model Comparison (§7.1)', '',
         '| Metric | Ours (OLS, Set C) | Strong (Random Forest) | RF 改善幅度 | 95% bootstrap CI | Bonferroni p |',
         '|---|---:|---:|---:|---|---:|']
     settings = {'MAE_EUR':('MAE (€K)',1000,0), 'RMSLE':('RMSLE',1,3),
@@ -266,7 +269,7 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         f'**Held-out test 上，RF 的 MAE、RMSLE 與 Within ±20% 均較佳。** MAE／RMSLE 的改善幅度是 Ours − RF；Within ±20% 是 RF − Ours，差值單位為百分點。後者只包含身價 > 0 的 {positive_n:,} 位球員。',
         'MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test 使用 squared log1p loss，CI 則直接 bootstrap RMSLE 差；Within ±20% 使用 exact McNemar。p-value 對三項指標檢定作 Bonferroni 校正，CI 為逐項區間。'.replace('三项','三項'),
         '這些推論假設球員獨立、模型固定。league cluster bootstrap 的敏感度結果保留在 [model_comparisons.csv](model_comparisons.csv)。±20% 門檻於 test 評估後決定，屬事後分析；它與「每位球員都符合某個 RMSLE 門檻」不是同一判準。', '',
-        '## 最終模型係數（§8.1）', '',
+        '## Final Model Coefficients (§8.1)', '',
         '以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與 p-value 採 HC3；組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。', '',
         '| Feature | β | HC3 95% CI | HC3 p | VIF |',
         '|---|---:|---|---:|---:|']
@@ -298,7 +301,7 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         lines.append(f'| `{row.feature_incremented}` | {row.delta_prediction_eur/1000:.1f} | [{row.ci95_low_eur/1000:.1f}, {row.ci95_high_eur/1000:.1f}] | {conclusion} |')
     lines += ['',
         '兩個 CI 都排除零，但統計顯著不直接等於實務價值。€200K 是沿用事後 ±20% 的示例門檻，尚未驗證為使用者容忍度；上述情境也不是觀測到的實驗結果或因果效果。CI 固定參考預測，不包含其不確定性，也不代表 EUR 條件平均。€10M 情境與精確金額見 [practical_effects_eur.csv](practical_effects_eur.csv)。', '',
-        '## 錯誤案例分析（§8.2）', '',
+        '## Error Analysis (§8.2)', '',
         '**依最終 OLS 的最大 absolute EUR error 選出三例。** 下表及圖使用 `signed error = actual − predicted`，負值表示高估；所有金額單位為 €M。', '',
         '| Player | Actual (€M) | Ours prediction (€M) | Signed error (€M) | RF absolute error (€M) |',
         '|---|---:|---:|---:|---:|---:|']
@@ -322,12 +325,60 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         '### 共同模式與改善方向', '',
         f"三例都是高身價 RB／CDM，且 OLS 高估。Training OOF 中，身價 ≥€50M 的 RB／CDM 只有 {int(pattern.n_train)} 位，OLS 對 {int(pattern.n_ols_overpredicted)} 位高估；平均 signed error 為 {signed_money(-pattern.mean_signed_error_ols_eur)}，MAE 為 Ours €{pattern.mae_ols_eur/1e6:.3f}M、RF €{pattern.mae_rf_eur/1e6:.3f}M。這支持進一步檢查高身價球員的校準，但不能推論所有後衛都高估，或 RF 在所有高身價球員都更好。",
         '這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](shared_pattern_oof.csv)。後續可在新的實驗中檢查位置 × 能力、`age` × `potential` 的交互項或分段效果，不用目前的 test 調參。', '',
-        '![誤差分布](residual_vs_actual.png)', '',
+        f'![誤差分布]({figure.name})', '',
         '圖中 signed error 的定義與案例表相同；完整逐筆結果見 [all_residuals.csv](all_residuals.csv)。原始 CSV 同時保留兩個方向的誤差欄位，閱讀時依欄名判讀。', '',
-        '## 執行與補充資料', '',
+        '## Analysis Settings', '',
         f"本次 bootstrap 使用 B={notes['bootstrap']:,}、seed={notes['seed']}。分析使用既有預測 CSV 的兩位小數 EUR；RF 的 RMSLE 與未捨入主表有微小差異，捨入到三位小數後同為 0.078。",
-        f'套件設定、方法依據與重現方式見 [執行指南]({guide_path})；來源版本與檔案 SHA 保留在 [provenance.json](provenance.json)。CSV 保留完整精度，本文只統一閱讀格式。', '']
-    (output/'Analysis_Summary.md').write_text('\n'.join(lines),encoding='utf-8')
+        '來源版本、輸入檔案 SHA、套件版本與設定保留在 [provenance.json](provenance.json)。CSV 保留完整精度；正文使用 part 2 的模型名稱、金額單位與小數格式。', '']
+    lines += reproduction_notes(output, report)
+
+    def result_link(match):
+        target = match.group(1)
+        if target == figure.name:
+            path = figure
+        elif target in {path.name for path in output.iterdir()}:
+            path = output / target
+        else:
+            return match.group(0)
+        return '](' + relpath(path.resolve(), report.parent.resolve()).replace('\\', '/') + ')'
+
+    content = re.sub(r'\]\(([^)]+)\)', result_link, '\n'.join(lines))
+    report.write_text(content, encoding='utf-8')
+
+def reproduction_notes(output: Path, report: Path) -> list[str]:
+    """將必要執行說明放在同一份分析正文文末。"""
+    result_dir = relpath(output.resolve(), report.parent.resolve()).replace('\\', '/')
+    rows = [
+        ('model_comparisons.csv', 'OLS／Random Forest 的三項指標、檢定與 bootstrap CI'),
+        ('coefficients_hc3.csv', '截距及 31 個 features；同時保留 classical／HC3 與 VIF'),
+        ('hypothesis_block_tests.csv', 'H1／H2 整組 HC3 檢定'),
+        ('marginal_effects.csv', '含平方／交互項的有限對比與局部 training 支持'),
+        ('practical_effects_eur.csv', '固定參考情境的 EUR 預測差與 CI'),
+        ('largest_error_cases.csv', '按 absolute EUR error 排序的案例與背景'),
+        ('case_training_evidence.csv', '案例的相似 training 群體及 OOF 誤差'),
+        ('nearest_training_cases.csv', '相似 training 球員明細'),
+        ('shared_pattern_oof.csv', '事後選定共同模式的 OOF 查證'),
+        ('all_residuals.csv', '完整逐筆誤差，供追溯'),
+        ('provenance.json', '輸入及程式 SHA-256、套件版本、設定與推論假設'),
+    ]
+    lines = ['', '## Result Files', '',
+             '| File | 用途 |', '|---|---|']
+    lines += [f'| [{name}]({result_dir}/{name}) | {purpose} |' for name, purpose in rows]
+    lines += ['', '## Reproduction', '',
+        '沿用 README 的 Python 3.12 執行環境。從完整 repository 根目錄安裝第三部分需求；requirements-analysis.txt 載入組員原本的 requirements.txt，再加入 statsmodels：', '',
+        '```bash', 'python -m pip install -r requirements-analysis.txt', '```', '',
+        '使用新的輸出根目錄，程式會建立 doc/、results/statistical_analysis/ 與 png/；既有輸出不會被覆蓋：', '',
+        '```bash',
+        'python src/analyze_current_results.py --output analysis_outputs/part3_reproduced --bootstrap 2000 --seed 42',
+        'python -m unittest discover -s tests -v', '```', '',
+        'src/analyze_current_results.py 是正式入口；src/analysis_part3.py 提供共用檢查、設計矩陣診斷、來源紀錄及圖表。tests/test_current_results.py 是選擇性程式驗證，不參與正式分析計算。', '',
+        '輸入沿用 data/splits/、results/final_test/、results/linear/main/ 與 results/linear/ablation/。分析會核對 player IDs、固定 split、OOF folds、features、全部係數及既有 test 預測；重建同一個 OLS 是為了係數推論與核對，沒有重新選模或用 test 調參。', '',
+        '程式需要中文字型：macOS 通常有 PingFang TC，Windows 可使用 Microsoft JhengHei，Linux 可使用 Noto Sans CJK TC。缺少字型時會停止，請安裝後再執行。', '',
+        '原始 CSV 的 residual_eur、mean_signed_error_ols_eur 等欄位保留 predicted − actual；正文與圖使用 actual − predicted。閱讀時依欄名判讀。p-value 若儲存為 0，表示數值下溢，不是數學上的精確 0。', '',
+        '正式 ACL 報告仍需整合各部分內容，補上表／圖編號、caption 與正文引用。', '',
+        '方法與課程依據：[課程規格](https://docs.google.com/presentation/d/1xmiuV3wiYCCg5r3_tMDF5b5uF7VQweaWSDrZ6DDazG0/edit)、[HC3](https://www.statsmodels.org/stable/generated/statsmodels.stats.sandwich_covariance.cov_hc3.html)、[McNemar](https://www.statsmodels.org/dev/generated/statsmodels.stats.contingency_tables.mcnemar.html)。', '']
+    return lines
+
 
 def run(args: argparse.Namespace) -> Path:
     root = Path(__file__).resolve().parents[1]
@@ -362,7 +413,13 @@ def run(args: argparse.Namespace) -> Path:
     require(np.allclose(check[OURS],check.reconstructed,rtol=0,atol=0.0051), "既有最終預測與重建模型不一致。")
     differences = comparisons(frame,args.bootstrap,args.seed)
     cases,evidence,neighbors = case_evidence(frame,train,oof)
-    output = output_directory(args.output)
+    destination = output_directory(args.output)
+    output = destination / 'results/statistical_analysis'
+    output.mkdir(parents=True)
+    report = destination / 'doc/Statistical_Significance_and_Error_Analysis.md'
+    report.parent.mkdir()
+    figure = destination / 'png/statistical_analysis_residuals.png'
+    figure.parent.mkdir()
     differences.to_csv(output/'model_comparisons.csv',index=False)
     table.to_csv(output/'coefficients_hc3.csv',index=False)
     blocks.to_csv(output/'hypothesis_block_tests.csv',index=False)
@@ -377,7 +434,7 @@ def run(args: argparse.Namespace) -> Path:
     evidence.to_csv(output/'case_training_evidence.csv',index=False)
     neighbors.to_csv(output/'nearest_training_cases.csv',index=False)
     plot = cases.copy(); plot['y_pred']=plot[OURS]
-    residual_chart(plot,output)
+    residual_chart(plot,figure)
     notes.update(upstream_commit=subprocess.check_output(['git','rev-parse','origin/main'],cwd=root,text=True).strip(),
         n_train=len(train),n_test=len(test),bootstrap=args.bootstrap,seed=args.seed,
         max_prediction_rounding_difference=float(np.max(np.abs(check[OURS]-check.reconstructed))),
@@ -388,15 +445,15 @@ def run(args: argparse.Namespace) -> Path:
         script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     code_paths=[Path(__file__),root/'src/linear_features.py',root/'src/experiment_utils.py',root/'src/analysis_part3.py']
     provenance(output,list(paths.values())+code_paths,notes)
-    summary_report(output,differences,table,cases,evidence,notes,ablation,blocks,practical,patterns)
+    summary_report(output,differences,table,cases,evidence,notes,ablation,blocks,practical,patterns,report,figure)
     print(f'已核對全部既有預測，最大歐元捨入差為 {notes["max_prediction_rounding_difference"]:.6f}.')
-    print(f'輸出資料夾： {output.resolve()}')
-    return output
+    print(f'輸出根目錄： {destination.resolve()}')
+    return destination
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output',required=True)
+    parser.add_argument('--output',required=True,help='新的輸出根目錄，內含 doc/、results/statistical_analysis/、png/。')
     parser.add_argument('--bootstrap',type=int,default=2000)
     parser.add_argument('--seed',type=int,default=42)
     run(parser.parse_args())

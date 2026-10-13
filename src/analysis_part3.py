@@ -16,9 +16,14 @@ import scipy
 import sklearn
 import statsmodels
 
-BLUE = "#295F8A"
-plt.rcParams.update({"font.size": 11, "axes.spines.top": False,
-                     "axes.spines.right": False, "figure.dpi": 120})
+BLUE = "#2a78d6"
+plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5,
+                     "text.color": "#0b0b0b", "axes.labelcolor": "#52514e",
+                     "axes.edgecolor": "#c3c2b7", "axes.linewidth": 0.8,
+                     "axes.spines.top": False, "axes.spines.right": False,
+                     "axes.grid": True, "grid.color": "#e1e0d9",
+                     "grid.linewidth": 0.6, "legend.frameon": False,
+                     "savefig.dpi": 300, "savefig.bbox": "tight"})
 
 
 def configure_chinese_font() -> str:
@@ -89,7 +94,7 @@ def design_diagnostics(matrix: np.ndarray) -> tuple:
 
 
 
-def residual_chart(selected: pd.DataFrame, output: Path) -> None:
+def residual_chart(selected: pd.DataFrame, path: Path) -> None:
     """繪製正文使用的 actual − predicted 誤差圖；負值為高估。"""
     y = selected.y_true / 1e6
     fig, ax = plt.subplots(figsize=(6.6, 4.6))
@@ -97,4 +102,4 @@ def residual_chart(selected: pd.DataFrame, output: Path) -> None:
     ax.axhline(0, linestyle="--", color="#555555")
     ax.set(xlabel="實際身價（百萬 EUR）", ylabel="actual − predicted（百萬 EUR）",
            title="預測誤差：負值為高估")
-    fig.tight_layout(); fig.savefig(output / "residual_vs_actual.png"); plt.close(fig)
+    fig.tight_layout(); fig.savefig(path); plt.close(fig)

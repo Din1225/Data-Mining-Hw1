@@ -12,15 +12,15 @@ HW1/
 │   ├── FC26_20250921.csv       # Kaggle 原始資料
 │   ├── splits/                 # 80/20 train-test 與 training portion 的 5-fold 資料
 │   └── processed_splits/       # 前處理後的 train-test 與 training portion 的 5-fold 資料 與 feature mapping
-├── doc/                        # 實作細節的文件 (可參考來做書面報告或上台報告)
-├── png/                        # 使用到的圖表和圖片
+├── doc/                        # 各部分的設定、分析結果、解讀與重現方式
+├── png/                        # EDA、實驗與統計分析的圖表
 ├── results/                    # 實驗結果
 │   ├── tuning/                 # strong baseline（Random Forest）超參數搜尋
 │   ├── linear/main/            # 線性變體選擇、VIF、主實驗表（5-fold CV）
 │   ├── linear/ablation/        # 消融實驗與分群指標（5-fold CV）
 │   ├── final_test/             # held-out test 唯一一次評估、逐筆預測與係數表
 │   ├── threshold/              # decision threshold（±20%）的指標與 test 每位球員的誤差
-│   ├── part3/943351b_v4/        # 統計顯著性、係數推論、錯誤案例與查證資料
+│   ├── statistical_analysis/   # 統計顯著性、係數推論、錯誤案例與查證資料
 │   └── report/                 # 報告用表格（Markdown、LaTeX）與圖（PDF）
 ├── src/                        # 資料處理、EDA、實驗與第三部分分析程式
 ├── tests/                      # 第三部分分析程式的驗證
@@ -37,6 +37,8 @@ conda create --name dm-hw1 python=3.12 pip -y
 conda activate dm-hw1
 python -m pip install -r requirements.txt
 ```
+
+第三部分沿用相同環境，再執行 `python -m pip install -r requirements-analysis.txt` 安裝 statsmodels。
 
 ## 主要程式
 
@@ -73,14 +75,13 @@ python src/make_report_figures.py
 
 `run_final_test.py` 在 `results/final_test/test_scores.csv` 已存在時會拒絕執行，確保 test 只使用一次。
 
+第三部分使用上述既有結果，執行方式見 [Statistical_Significance_and_Error_Analysis](doc/Statistical_Significance_and_Error_Analysis.md#reproduction)。
+
 ## 文件
-
-- [第三部分分析結果](results/part3/943351b_v4/Analysis_Summary.md)：當前 OLS 分析底稿，供報告組員整合。
-- [第三部分執行指南](doc/Part3_Analysis_Guide.md)：分析環境、執行指令與推論限制。
-
 
 - `doc/Task_Definition_and_Data.md`：任務定義、資料摘要、資料切分與 preprocessing 說明。
 - `doc/Exploratory_Feature_Analysis_and_Feature_Engineering.md`：feature–target 圖表、Pearson correlation、feature redundancy 與後續假設。
 - `doc/Experiments_and_Ablation.md`：主實驗、超參數選擇、消融實驗、分群分析與最終模型係數的解讀。
 - `doc/Decision_Threshold.md`：decision threshold（±20% 相對誤差）的定義、選擇理由、比較結果，以及給 part 3 與報告撰寫的使用說明。
+- [doc/Statistical_Significance_and_Error_Analysis.md](doc/Statistical_Significance_and_Error_Analysis.md)：模型比較、係數推論、錯誤案例、查證資料與重現方式。
 

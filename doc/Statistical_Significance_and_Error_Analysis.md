@@ -1,9 +1,11 @@
-# 統計顯著性與錯誤案例分析
+# Statistical_Significance_and_Error_Analysis
 
 **本節接續 part 2 的既有結果，分析最終線性模型 Ours（OLS, Set C）與 strong baseline（Random Forest）。** 固定 training portion 為 14,724 筆，held-out test 為 3,681 筆。
 模型使用 31 個 features，target 為 `log1p(value_eur)`；預測以 `expm1` 還原，再截在 training 身價範圍。以下使用組員已匯出的 test 預測，並重建同一個 OLS 核對係數。
 
-## 模型比較（§7.1）
+組員在 OLS、Ridge、Lasso、ElasticNet 中選出最終線性模型，另外訓練 Random Forest 作為 strong baseline。本節的顯著性比較針對 OLS／Random Forest；其他 baseline 分數見 [test_scores.csv](../results/final_test/test_scores.csv)。模型、features 與 test 預測均沿用 part 2 的既定結果。
+
+## Model Comparison (§7.1)
 
 | Metric | Ours (OLS, Set C) | Strong (Random Forest) | RF 改善幅度 | 95% bootstrap CI | Bonferroni p |
 |---|---:|---:|---:|---|---:|
@@ -13,11 +15,11 @@
 
 **Held-out test 上，RF 的 MAE、RMSLE 與 Within ±20% 均較佳。** MAE／RMSLE 的改善幅度是 Ours − RF；Within ±20% 是 RF − Ours，差值單位為百分點。後者只包含身價 > 0 的 3,665 位球員。
 MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test 使用 squared log1p loss，CI 則直接 bootstrap RMSLE 差；Within ±20% 使用 exact McNemar。p-value 對三項指標檢定作 Bonferroni 校正，CI 為逐項區間。
-這些推論假設球員獨立、模型固定。league cluster bootstrap 的敏感度結果保留在 [model_comparisons.csv](model_comparisons.csv)。±20% 門檻於 test 評估後決定，屬事後分析；它與「每位球員都符合某個 RMSLE 門檻」不是同一判準。
+這些推論假設球員獨立、模型固定。league cluster bootstrap 的敏感度結果保留在 [model_comparisons.csv](../results/statistical_analysis/model_comparisons.csv)。±20% 門檻於 test 評估後決定，屬事後分析；它與「每位球員都符合某個 RMSLE 門檻」不是同一判準。
 
-## 最終模型係數（§8.1）
+## Final Model Coefficients (§8.1)
 
-以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與 p-value 採 HC3；組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。
+以下 β 是 feature 增加 1 training SD 時，`log1p(value_eur)` 尺度的係數。CI 與 p-value 採 HC3；組員原本的係數表採 classical OLS，兩種方法均保留在 [coefficients_hc3.csv](../results/statistical_analysis/coefficients_hc3.csv)。截距及 Bonferroni 校正結果另見同檔。
 
 | Feature | β | HC3 95% CI | HC3 p | VIF |
 |---|---:|---|---:|---:|
@@ -64,10 +66,10 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 | H1 (`overall`) | `overall`、`overall_sq_centered`、`overall_x_reputation` | 0.171 → 0.283 | 5/5 folds 均變差 |
 | H2 (`international_reputation`) | `international_reputation`、`overall_x_reputation` | 0.171 → 0.175 | 5/5 folds 均變差 |
 
-這與 part 2 對預測價值的解讀一致。因為 CV folds 的 training sets 重疊，這裡使用消融結果作描述性證據；不把五個 folds 當成五個獨立實驗。H1／H2 的整組 HC3 檢定也拒絕零係數（均 p < 0.001），完整結果見 [hypothesis_block_tests.csv](hypothesis_block_tests.csv)。這是條件關聯的檢定，與預測消融的問題不同。
-消融數值直接引用 [組員的 CV 消融結果](../../linear/ablation/cv_summary.csv)，不採用其中的 fold paired t-test p-value。
+這與 part 2 對預測價值的解讀一致。因為 CV folds 的 training sets 重疊，這裡使用消融結果作描述性證據；不把五個 folds 當成五個獨立實驗。H1／H2 的整組 HC3 檢定也拒絕零係數（均 p < 0.001），完整結果見 [hypothesis_block_tests.csv](../results/statistical_analysis/hypothesis_block_tests.csv)。這是條件關聯的檢定，與預測消融的問題不同。
+消融數值直接引用 [組員的 CV 消融結果](../results/linear/ablation/cv_summary.csv)，不採用其中的 fold paired t-test p-value。
 
-`international_reputation` 的條件效果會隨 `overall` 改變，例如 `overall` = 80 時 +1 約對應 +8.5%，85 時約 −3.7%。局部 training 支持與完整有限對比見 [marginal_effects.csv](marginal_effects.csv)。
+`international_reputation` 的條件效果會隨 `overall` 改變，例如 `overall` = 80 時 +1 約對應 +8.5%，85 時約 −3.7%。局部 training 支持與完整有限對比見 [marginal_effects.csv](../results/statistical_analysis/marginal_effects.csv)。
 
 ### EUR 尺度的實務意義
 
@@ -78,9 +80,9 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 | `overall` | 165.6 | [162.8, 168.3] | 低於 |
 | `international_reputation` | 379.2 | [325.5, 435.0] | 超過 |
 
-兩個 CI 都排除零，但統計顯著不直接等於實務價值。€200K 是沿用事後 ±20% 的示例門檻，尚未驗證為使用者容忍度；上述情境也不是觀測到的實驗結果或因果效果。CI 固定參考預測，不包含其不確定性，也不代表 EUR 條件平均。€10M 情境與精確金額見 [practical_effects_eur.csv](practical_effects_eur.csv)。
+兩個 CI 都排除零，但統計顯著不直接等於實務價值。€200K 是沿用事後 ±20% 的示例門檻，尚未驗證為使用者容忍度；上述情境也不是觀測到的實驗結果或因果效果。CI 固定參考預測，不包含其不確定性，也不代表 EUR 條件平均。€10M 情境與精確金額見 [practical_effects_eur.csv](../results/statistical_analysis/practical_effects_eur.csv)。
 
-## 錯誤案例分析（§8.2）
+## Error Analysis (§8.2)
 
 **依最終 OLS 的最大 absolute EUR error 選出三例。** 下表及圖使用 `signed error = actual − predicted`，負值表示高估；所有金額單位為 €M。
 
@@ -108,18 +110,62 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 - **查證：** 相同主要位置、`overall` ±3、`age` ±3 的 training 球員有 3 位；OOF MAE 為 Ours €11.369M、RF €7.577M，Ours 平均 signed error 為 −€11.369M。
 - **可能原因：** 相似 training 群體的 OLS OOF 平均也為高估，支持局部校準偏差的候選解釋。但 RF 對此例是低估，而且 absolute error 略大，原因仍需考慮高身價映射與未包含的資訊。
 
-相似球員的匹配只控制主要位置、`overall` 與 `age`，沒有涵蓋所有因素。上述原因是候選解釋；完整證據見 [case_training_evidence.csv](case_training_evidence.csv) 與 [nearest_training_cases.csv](nearest_training_cases.csv)。
+相似球員的匹配只控制主要位置、`overall` 與 `age`，沒有涵蓋所有因素。上述原因是候選解釋；完整證據見 [case_training_evidence.csv](../results/statistical_analysis/case_training_evidence.csv) 與 [nearest_training_cases.csv](../results/statistical_analysis/nearest_training_cases.csv)。
 
 ### 共同模式與改善方向
 
 三例都是高身價 RB／CDM，且 OLS 高估。Training OOF 中，身價 ≥€50M 的 RB／CDM 只有 6 位，OLS 對 6 位高估；平均 signed error 為 −€7.285M，MAE 為 Ours €7.285M、RF €8.015M。這支持進一步檢查高身價球員的校準，但不能推論所有後衛都高估，或 RF 在所有高身價球員都更好。
-這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](shared_pattern_oof.csv)。後續可在新的實驗中檢查位置 × 能力、`age` × `potential` 的交互項或分段效果，不用目前的 test 調參。
+這個小群體是在觀察 test 案例後選定，只作 OOF 探索；詳見 [shared_pattern_oof.csv](../results/statistical_analysis/shared_pattern_oof.csv)。後續可在新的實驗中檢查位置 × 能力、`age` × `potential` 的交互項或分段效果，不用目前的 test 調參。
 
-![誤差分布](residual_vs_actual.png)
+![誤差分布](../png/statistical_analysis_residuals.png)
 
-圖中 signed error 的定義與案例表相同；完整逐筆結果見 [all_residuals.csv](all_residuals.csv)。原始 CSV 同時保留兩個方向的誤差欄位，閱讀時依欄名判讀。
+圖中 signed error 的定義與案例表相同；完整逐筆結果見 [all_residuals.csv](../results/statistical_analysis/all_residuals.csv)。原始 CSV 同時保留兩個方向的誤差欄位，閱讀時依欄名判讀。
 
-## 執行與補充資料
+## Analysis Settings
 
 本次 bootstrap 使用 B=2,000、seed=42。分析使用既有預測 CSV 的兩位小數 EUR；RF 的 RMSLE 與未捨入主表有微小差異，捨入到三位小數後同為 0.078。
-套件設定、方法依據與重現方式見 [執行指南](../../../doc/Part3_Analysis_Guide.md)；來源版本與檔案 SHA 保留在 [provenance.json](provenance.json)。CSV 保留完整精度，本文只統一閱讀格式。
+來源版本、輸入檔案 SHA、套件版本與設定保留在 [provenance.json](../results/statistical_analysis/provenance.json)。CSV 保留完整精度；正文使用 part 2 的模型名稱、金額單位與小數格式。
+
+
+## Result Files
+
+| File | 用途 |
+|---|---|
+| [model_comparisons.csv](../results/statistical_analysis/model_comparisons.csv) | OLS／Random Forest 的三項指標、檢定與 bootstrap CI |
+| [coefficients_hc3.csv](../results/statistical_analysis/coefficients_hc3.csv) | 截距及 31 個 features；同時保留 classical／HC3 與 VIF |
+| [hypothesis_block_tests.csv](../results/statistical_analysis/hypothesis_block_tests.csv) | H1／H2 整組 HC3 檢定 |
+| [marginal_effects.csv](../results/statistical_analysis/marginal_effects.csv) | 含平方／交互項的有限對比與局部 training 支持 |
+| [practical_effects_eur.csv](../results/statistical_analysis/practical_effects_eur.csv) | 固定參考情境的 EUR 預測差與 CI |
+| [largest_error_cases.csv](../results/statistical_analysis/largest_error_cases.csv) | 按 absolute EUR error 排序的案例與背景 |
+| [case_training_evidence.csv](../results/statistical_analysis/case_training_evidence.csv) | 案例的相似 training 群體及 OOF 誤差 |
+| [nearest_training_cases.csv](../results/statistical_analysis/nearest_training_cases.csv) | 相似 training 球員明細 |
+| [shared_pattern_oof.csv](../results/statistical_analysis/shared_pattern_oof.csv) | 事後選定共同模式的 OOF 查證 |
+| [all_residuals.csv](../results/statistical_analysis/all_residuals.csv) | 完整逐筆誤差，供追溯 |
+| [provenance.json](../results/statistical_analysis/provenance.json) | 輸入及程式 SHA-256、套件版本、設定與推論假設 |
+
+## Reproduction
+
+沿用 README 的 Python 3.12 執行環境。從完整 repository 根目錄安裝第三部分需求；requirements-analysis.txt 載入組員原本的 requirements.txt，再加入 statsmodels：
+
+```bash
+python -m pip install -r requirements-analysis.txt
+```
+
+使用新的輸出根目錄，程式會建立 doc/、results/statistical_analysis/ 與 png/；既有輸出不會被覆蓋：
+
+```bash
+python src/analyze_current_results.py --output analysis_outputs/part3_reproduced --bootstrap 2000 --seed 42
+python -m unittest discover -s tests -v
+```
+
+src/analyze_current_results.py 是正式入口；src/analysis_part3.py 提供共用檢查、設計矩陣診斷、來源紀錄及圖表。tests/test_current_results.py 是選擇性程式驗證，不參與正式分析計算。
+
+輸入沿用 data/splits/、results/final_test/、results/linear/main/ 與 results/linear/ablation/。分析會核對 player IDs、固定 split、OOF folds、features、全部係數及既有 test 預測；重建同一個 OLS 是為了係數推論與核對，沒有重新選模或用 test 調參。
+
+程式需要中文字型：macOS 通常有 PingFang TC，Windows 可使用 Microsoft JhengHei，Linux 可使用 Noto Sans CJK TC。缺少字型時會停止，請安裝後再執行。
+
+原始 CSV 的 residual_eur、mean_signed_error_ols_eur 等欄位保留 predicted − actual；正文與圖使用 actual − predicted。閱讀時依欄名判讀。p-value 若儲存為 0，表示數值下溢，不是數學上的精確 0。
+
+正式 ACL 報告仍需整合各部分內容，補上表／圖編號、caption 與正文引用。
+
+方法與課程依據：[課程規格](https://docs.google.com/presentation/d/1xmiuV3wiYCCg5r3_tMDF5b5uF7VQweaWSDrZ6DDazG0/edit)、[HC3](https://www.statsmodels.org/stable/generated/statsmodels.stats.sandwich_covariance.cov_hc3.html)、[McNemar](https://www.statsmodels.org/dev/generated/statsmodels.stats.contingency_tables.mcnemar.html)。
