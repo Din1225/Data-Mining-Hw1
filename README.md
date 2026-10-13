@@ -20,8 +20,14 @@ HW1/
 │   ├── linear/ablation/        # 消融實驗與分群指標（5-fold CV）
 │   ├── final_test/             # held-out test 唯一一次評估、逐筆預測與係數表
 │   ├── threshold/              # decision threshold（±20%）的指標與 test 每位球員的誤差
+│   ├── part3/943351b_v4/        # 統計顯著性、係數推論、錯誤案例與查證資料
 │   └── report/                 # 報告用表格（Markdown、LaTeX）與圖（PDF）
-├── src/                        # 資料處理、EDA 與實驗的可重現程式
+├── src/                        # 資料處理、EDA、實驗與第三部分分析程式
+├── tests/                      # 第三部分分析程式的驗證
+│   └── test_current_results.py # 資料配對、統計計算與來源紀錄，共 8 項測試
+├── requirements.txt            # 組員主實驗的套件需求
+├── requirements-analysis.txt   # 載入 requirements.txt，再加入第三部分所需的 statsmodels
+├── .gitignore                  # 排除本機環境、暫存輸出與快取
 └── README.md                   # 專案與目錄說明
 ```
 
