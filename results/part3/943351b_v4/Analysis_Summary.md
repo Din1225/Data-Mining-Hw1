@@ -65,6 +65,8 @@ MAE 使用每位球員 absolute loss 的 paired t-test；RMSLE 的 paired t-test
 | H2 (`international_reputation`) | `international_reputation`、`overall_x_reputation` | 0.171 → 0.175 | 5/5 folds 均變差 |
 
 這與 part 2 對預測價值的解讀一致。因為 CV folds 的 training sets 重疊，這裡使用消融結果作描述性證據；不把五個 folds 當成五個獨立實驗。H1／H2 的整組 HC3 檢定也拒絕零係數（均 p < 0.001），完整結果見 [hypothesis_block_tests.csv](hypothesis_block_tests.csv)。這是條件關聯的檢定，與預測消融的問題不同。
+消融數值直接引用 [組員的 CV 消融結果](../../linear/ablation/cv_summary.csv)，不採用其中的 fold paired t-test p-value。
+
 `international_reputation` 的條件效果會隨 `overall` 改變，例如 `overall` = 80 時 +1 約對應 +8.5%，85 時約 −3.7%。局部 training 支持與完整有限對比見 [marginal_effects.csv](marginal_effects.csv)。
 
 ### EUR 尺度的實務意義

@@ -41,8 +41,7 @@ python -m pip install -r requirements.txt
 | `src/preprocess.py` | 以 training data fit preprocessing，輸出前處理後資料 |
 | `src/eda_feature_report.py` | 只使用 training split 重現 EDA 圖表與 Pearson correlation |
 | `src/analyze_current_results.py` | 第三部分：重建既有 Set C OLS，核對預測，產生係數推論、OLS／Random Forest 比較與錯誤案例 |
-| `src/analysis_part3.py` | 第三部分共用分析、圖表及資料對齊工具 |
-| `src/part3_chinese.py` | 第三部分圖表中文字型設定 |
+| `src/analysis_part3.py` | 第三部分共用檢查、設計矩陣診斷、來源紀錄與中文誤差圖 |
 | `src/run_tuning.py` | strong baseline（Random Forest）的超參數搜尋 |
 | `src/run_linear_models.py` | 比較 OLS／Ridge／Lasso／ElasticNet、計算 VIF，與三層 baseline 產生主實驗表 |
 | `src/run_linear_ablation.py` | 特徵集消融（Set A／B／C、移除特徵群組、H1／H2）與分群指標 |

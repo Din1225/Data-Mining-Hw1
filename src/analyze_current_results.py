@@ -18,8 +18,7 @@ from scipy import stats
 import statsmodels.api as sm
 
 from analysis_part3 import (
-    BLUE, GOLD, design_diagnostics, output_directory,
-    prediction_charts, provenance, require, plt,
+    design_diagnostics, output_directory, residual_chart, provenance, require,
 )
 from linear_features import FEATURE_GROUPS, SetCTransformer
 
@@ -132,19 +131,6 @@ def coefficient_inference(train: pd.DataFrame, transformer: SetCTransformer,
     tests["p_bonferroni_2"] = (tests.p_hc3*2).clip(upper=1)
     return table, tests, robust, {"rank":rank,"condition_number":condition,
         "max_coefficient_rounding_difference":float(np.max(np.abs(classical.params-reference.beta_per_sd.to_numpy())))}
-
-
-def coefficient_figure(table: pd.DataFrame, output: Path) -> None:
-    shown = table.iloc[1:].copy().sort_values("beta_per_sd_log1p_eur")
-    fig, ax = plt.subplots(figsize=(9.5,11.5))
-    y = np.arange(len(shown))
-    ax.hlines(y,shown.ci95_low_hc3,shown.ci95_high_hc3,color=BLUE)
-    ax.scatter(shown.beta_per_sd_log1p_eur,y,color=GOLD,s=20)
-    ax.axvline(0,color="#555555",linestyle="--")
-    ax.set_yticks(y,shown.feature)
-    ax.set(title="最終 OLS：全部31個係數與 HC3 95% CI",
-           xlabel="每 1 training SD 的 log1p(value_eur) 變化")
-    fig.tight_layout(); fig.savefig(output/'coefficient_hc3.png'); plt.close(fig)
 
 
 def marginal_effects(train: pd.DataFrame, transformer: SetCTransformer, robust) -> pd.DataFrame:
@@ -263,6 +249,7 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
 
     positive_n = int(comparison.loc[comparison.metric.eq('Within20_percent'),'n'].iloc[0])
     guide_path = relpath(Path(__file__).resolve().parents[1]/'doc/Part3_Analysis_Guide.md', output.resolve()).replace('\\','/')
+    ablation_path = relpath(Path(__file__).resolve().parents[1]/'results/linear/ablation/cv_summary.csv', output.resolve()).replace('\\','/')
     lines = ['# 統計顯著性與錯誤案例分析', '',
         f"**本節接續 part 2 的既有結果，分析最終線性模型 Ours（OLS, Set C）與 strong baseline（Random Forest）。** 固定 training portion 為 {notes['n_train']:,} 筆，held-out test 為 {notes['n_test']:,} 筆。",
         '模型使用 31 個 features，target 為 `log1p(value_eur)`；預測以 `expm1` 還原，再截在 training 身價範圍。以下使用組員已匯出的 test 預測，並重建同一個 OLS 核對係數。', '',
@@ -300,6 +287,7 @@ def summary_report(output: Path, comparison: pd.DataFrame, table: pd.DataFrame,
         lines.append(f'| {label} | {removed} | {baseline:.3f} → {value:.3f} | 5/5 folds 均變差 |')
     lines += ['',
         '這與 part 2 對預測價值的解讀一致。因為 CV folds 的 training sets 重疊，這裡使用消融結果作描述性證據；不把五個 folds 當成五個獨立實驗。H1／H2 的整組 HC3 檢定也拒絕零係數（均 p < 0.001），完整結果見 [hypothesis_block_tests.csv](hypothesis_block_tests.csv)。這是條件關聯的檢定，與預測消融的問題不同。',
+        f'消融數值直接引用 [組員的 CV 消融結果]({ablation_path})，不採用其中的 fold paired t-test p-value。', '',
         '`international_reputation` 的條件效果會隨 `overall` 改變，例如 `overall` = 80 時 +1 約對應 +8.5%，85 時約 −3.7%。局部 training 支持與完整有限對比見 [marginal_effects.csv](marginal_effects.csv)。', '',
         '### EUR 尺度的實務意義', '',
         '固定 `overall` = 70、`international_reputation` = 1、其他輸入不變，並假設參考預測為 €1M。共同計入平方項／交互項後，得到以下裁切前預測差：', '',
@@ -381,17 +369,15 @@ def run(args: argparse.Namespace) -> Path:
     effects.to_csv(output/'marginal_effects.csv',index=False)
     practical.to_csv(output/'practical_effects_eur.csv',index=False)
     patterns.to_csv(output/'shared_pattern_oof.csv',index=False)
-    ablation.drop(columns=['paired_t_p_vs_set_c']).to_csv(output/'ablation_descriptive.csv',index=False)
     cols = [*IDS,'short_name','age','overall','potential','international_reputation','player_positions',
             'league_id','league_name','y_true',OURS,RF,'residual_eur','actual_minus_predicted_eur',
             'absolute_error_eur','relative_error','abs_log1p_error','rf_absolute_error_eur','at_training_max_clip']
     cases[cols].to_csv(output/'all_residuals.csv',index=False)
     cases.head(10)[cols].to_csv(output/'largest_error_cases.csv',index=False)
-    cases.sort_values('abs_log1p_error',ascending=False).head(10)[cols].to_csv(output/'largest_log_error_cases.csv',index=False)
     evidence.to_csv(output/'case_training_evidence.csv',index=False)
     neighbors.to_csv(output/'nearest_training_cases.csv',index=False)
-    plot = cases.copy(); plot['y_pred']=plot[OURS]; plot['split']='test'
-    prediction_charts(plot,output,False); coefficient_figure(table,output)
+    plot = cases.copy(); plot['y_pred']=plot[OURS]
+    residual_chart(plot,output)
     notes.update(upstream_commit=subprocess.check_output(['git','rev-parse','origin/main'],cwd=root,text=True).strip(),
         n_train=len(train),n_test=len(test),bootstrap=args.bootstrap,seed=args.seed,
         max_prediction_rounding_difference=float(np.max(np.abs(check[OURS]-check.reconstructed))),
@@ -400,7 +386,7 @@ def run(args: argparse.Namespace) -> Path:
         posthoc='20%門檻於測試評估後選定，不宣稱是事先指定門檻的推論。',
         ci='95%逐項百分位數區間；三項比較的p值採Bonferroni校正。',
         script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
-    code_paths=[Path(__file__),root/'src/linear_features.py',root/'src/experiment_utils.py',root/'src/analysis_part3.py',root/'src/part3_chinese.py']
+    code_paths=[Path(__file__),root/'src/linear_features.py',root/'src/experiment_utils.py',root/'src/analysis_part3.py']
     provenance(output,list(paths.values())+code_paths,notes)
     summary_report(output,differences,table,cases,evidence,notes,ablation,blocks,practical,patterns)
     print(f'已核對全部既有預測，最大歐元捨入差為 {notes["max_prediction_rounding_difference"]:.6f}.')

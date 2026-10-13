@@ -23,14 +23,13 @@
 | `practical_effects_eur.csv` | 固定參考情境的 EUR 預測差與 CI |
 | `largest_error_cases.csv` | 最大 EUR 誤差案例、實際值、預測值與背景 |
 | `case_training_evidence.csv`、`nearest_training_cases.csv`、`shared_pattern_oof.csv` | 案例的 training／OOF 查證資料 |
-| `all_residuals.csv`、`largest_log_error_cases.csv` | 完整誤差及另一種排序，供追溯 |
-| `ablation_descriptive.csv` | 沿用組員的 CV 消融結果，只作描述性分析 |
-| `*.png` | 係數、實際／預測身價與誤差圖 |
+| `all_residuals.csv` | 完整逐筆誤差，供追溯 |
+| `residual_vs_actual.png` | 正文使用的誤差圖 |
 | `provenance.json` | 輸入及程式 SHA-256、套件版本、設定與假設；路徑以 repository 根目錄為基準 |
 
 正文與誤差圖統一使用 `signed error = actual − predicted`，負值表示高估。原始 CSV 的 `residual_eur`、`mean_signed_error_ols_eur` 等欄位仍按原定義保留 `predicted − actual`；正文呈現時換成相反方向，原始數值不修改。
 
-以上檔案均位於 `results/part3/943351b_v4/`。正式報告需整理成完整係數表、三案例表與精簡段落，補上表／圖編號、caption、正文引用和單位。
+以上分析結果均位於 `results/part3/943351b_v4/`。消融數值直接沿用 [組員的 CV 消融結果](../results/linear/ablation/cv_summary.csv)，只作描述性分析，不採用其中的 fold paired t-test p-value。正式報告需整理成完整係數表、三案例表與精簡段落，補上表／圖編號、caption、正文引用和單位。
 
 ## 建立分析環境
 
@@ -55,7 +54,7 @@ Windows 可將 `.venv-analysis/bin/python` 改為 `.venv-analysis\Scripts\python
 
 分析會核對固定 split、player IDs、target、OOF fold、全部係數與既有 test 預測。重新執行時不呼叫 `run_final_test.py`；既有 test 預測只供核對與分析。
 
-`src/analysis_part3.py` 提供共用功能，另保留通用 OLS／Ridge 分析入口；其通用係數入口只支援 identity target。當前 log1p target 模型請使用上述 `analyze_current_results.py`。
+`src/analyze_current_results.py` 是正式分析入口；`src/analysis_part3.py` 提供實際使用的共用檢查、設計矩陣診斷、來源紀錄及中文字型／誤差圖設定。
 
 ## 解讀時保留的限制
 

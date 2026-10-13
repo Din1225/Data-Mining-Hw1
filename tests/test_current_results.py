@@ -1,6 +1,9 @@
 """獨立驗證對數目標銜接、資料配對與二元結果比較。"""
 from pathlib import Path
 import sys
+import hashlib
+import json
+import tempfile
 from types import SimpleNamespace
 import unittest
 
@@ -10,6 +13,7 @@ import statsmodels.api as sm
 from statsmodels.stats.contingency_tables import mcnemar
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
+from analysis_part3 import provenance
 from analyze_current_results import align_saved_predictions, comparisons, coefficient_inference, effect_gaps, practical_effects, MODELS
 
 
@@ -82,6 +86,20 @@ class CurrentResultsTests(unittest.TestCase):
         self.assertAlmostEqual(row.ci95_low_eur,100000.1)
         self.assertAlmostEqual(row.ci95_high_eur,300000.3)
         self.assertEqual(row.illustrative_20pct_eur,200000)
+
+
+    def test_provenance_can_be_resolved_after_repository_is_moved(self):
+        root = Path(__file__).resolve().parents[1]
+        source = root / 'src/analysis_part3.py'
+        with tempfile.TemporaryDirectory() as directory:
+            provenance(Path(directory), [source], {})
+            record = json.loads((Path(directory) / 'provenance.json').read_text())
+            self.assertEqual(record['path_base'], 'repository_root')
+            self.assertEqual(record['inputs'][0]['path'], 'src/analysis_part3.py')
+            resolved = root / record['inputs'][0]['path']
+            self.assertEqual(hashlib.sha256(resolved.read_bytes()).hexdigest(),
+                             record['inputs'][0]['sha256'])
+
 
 
 if __name__=='__main__':
